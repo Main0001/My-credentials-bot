@@ -19,22 +19,32 @@ export class CredentialsService {
 
   async findAllByUser(userId: string) {
     const credentials = await this.credentialsRepository.findAllByUser(userId);
-    return credentials.map((c) => this.decryptCredential(c));
+    return credentials.map((c) => ({
+      ...c,
+      password: this.cryptoHelper.decrypt(c.password),
+    }));
   }
 
   async findByGroup(userId: string, groupId: string) {
     const credentials = await this.credentialsRepository.findByGroup(userId, groupId);
-    return credentials.map((c) => this.decryptCredential(c));
+    return credentials.map((c) => ({
+      ...c,
+      password: this.cryptoHelper.decrypt(c.password),
+    }));
   }
 
   async findWithoutGroup(userId: string) {
     const credentials = await this.credentialsRepository.findWithoutGroup(userId);
-    return credentials.map((c) => this.decryptCredential(c));
+    return credentials.map((c) => ({
+      ...c,
+      password: this.cryptoHelper.decrypt(c.password),
+    }));
   }
 
   async findOne(credentialId: string, userId: string) {
     const credential = await this.credentialsRepository.findOne(credentialId, userId);
-    return credential ? this.decryptCredential(credential) : null;
+    if (!credential) return null;
+    return { ...credential, password: this.cryptoHelper.decrypt(credential.password) };
   }
 
   update(credentialId: string, userId: string, data: UpdateCredentialData) {
@@ -46,12 +56,5 @@ export class CredentialsService {
 
   delete(credentialId: string, userId: string) {
     return this.credentialsRepository.delete(credentialId, userId);
-  }
-
-  private decryptCredential<T extends { password: string }>(credential: T): T {
-    return {
-      ...credential,
-      password: this.cryptoHelper.decrypt(credential.password),
-    };
   }
 }
