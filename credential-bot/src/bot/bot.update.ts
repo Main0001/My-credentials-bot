@@ -1,5 +1,4 @@
-import { UseGuards } from '@nestjs/common';
-import { Update, Start, Ctx, Use, Hears, Action } from 'nestjs-telegraf';
+import { Update, Start, Ctx, Use, Hears, Action, Next } from 'nestjs-telegraf';
 import type { BotContext } from './interfaces/bot-context.interface';
 import { ActivityMiddleware } from './middlewares/activity.middleware';
 import { AuthGuard } from './guards/auth.guard';
@@ -9,10 +8,13 @@ import { credentialsMenuKeyboard } from './keyboards/credentials.keyboard';
 
 @Update()
 export class BotUpdate {
-  constructor(private readonly activityMiddleware: ActivityMiddleware) {}
+  constructor(
+    private readonly activityMiddleware: ActivityMiddleware,
+    private readonly authGuard: AuthGuard,
+  ) {}
 
   @Use()
-  async onUse(@Ctx() ctx: BotContext, next: () => Promise<void>) {
+  async onUse(@Ctx() ctx: BotContext, @Next() next: () => Promise<void>) {
     await this.activityMiddleware.update(ctx, next);
   }
 
@@ -25,26 +27,26 @@ export class BotUpdate {
   }
 
   @Hears('Groups')
-  @UseGuards(AuthGuard)
   async onGroups(@Ctx() ctx: BotContext) {
+    if (!(await this.authGuard.validate(ctx))) return;
     await ctx.reply('Groups menu:', groupsMenuKeyboard());
   }
 
   @Hears('Credentials')
-  @UseGuards(AuthGuard)
   async onCredentials(@Ctx() ctx: BotContext) {
+    if (!(await this.authGuard.validate(ctx))) return;
     await ctx.reply('Credentials menu:', credentialsMenuKeyboard());
   }
 
   @Hears('Reset password')
-  @UseGuards(AuthGuard)
   async onResetPassword(@Ctx() ctx: BotContext) {
+    if (!(await this.authGuard.validate(ctx))) return;
     await ctx.scene.enter('reset-password');
   }
 
   @Action('back_to_main')
-  @UseGuards(AuthGuard)
   async onBackToMain(@Ctx() ctx: BotContext) {
+    if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
     await ctx.editMessageText('Main menu:');
     await ctx.reply('Choose an option:', mainKeyboard());

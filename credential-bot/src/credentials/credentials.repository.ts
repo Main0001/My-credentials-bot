@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateCredentialData, UpdateCredentialData } from './interfaces/credentials.interfaces';
+import {
+  CreateCredentialData,
+  UpdateCredentialData,
+} from './interfaces/credentials.interfaces';
 
 @Injectable()
 export class CredentialsRepository {

@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { CredentialsRepository } from './credentials.repository';
-import { CreateCredentialData, UpdateCredentialData } from './interfaces/credentials.interfaces';
+import {
+  CreateCredentialData,
+  UpdateCredentialData,
+} from './interfaces/credentials.interfaces';
 import { CryptoHelper } from '../bot/helpers/crypto.helper';
 
 @Injectable()
@@ -26,7 +29,10 @@ export class CredentialsService {
   }
 
   async findByGroup(userId: string, groupId: string) {
-    const credentials = await this.credentialsRepository.findByGroup(userId, groupId);
+    const credentials = await this.credentialsRepository.findByGroup(
+      userId,
+      groupId,
+    );
     return credentials.map((c) => ({
       ...c,
       password: this.cryptoHelper.decrypt(c.password),
@@ -34,7 +40,8 @@ export class CredentialsService {
   }
 
   async findWithoutGroup(userId: string) {
-    const credentials = await this.credentialsRepository.findWithoutGroup(userId);
+    const credentials =
+      await this.credentialsRepository.findWithoutGroup(userId);
     return credentials.map((c) => ({
       ...c,
       password: this.cryptoHelper.decrypt(c.password),
@@ -42,9 +49,15 @@ export class CredentialsService {
   }
 
   async findOne(credentialId: string, userId: string) {
-    const credential = await this.credentialsRepository.findOne(credentialId, userId);
+    const credential = await this.credentialsRepository.findOne(
+      credentialId,
+      userId,
+    );
     if (!credential) return null;
-    return { ...credential, password: this.cryptoHelper.decrypt(credential.password) };
+    return {
+      ...credential,
+      password: this.cryptoHelper.decrypt(credential.password),
+    };
   }
 
   update(credentialId: string, userId: string, data: UpdateCredentialData) {
