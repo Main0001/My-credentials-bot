@@ -3,6 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { configuration } from './config/config';
+import { PrismaModule } from './prisma/prisma.module';
+import { BotModule } from './bot/bot.module';
 
 @Module({
   imports: [
@@ -10,6 +12,8 @@ import { configuration } from './config/config';
       isGlobal: true,
       load: [configuration],
     }),
+    PrismaModule,
+    BotModule,
   ],
   controllers: [AppController],
   providers: [AppService],
