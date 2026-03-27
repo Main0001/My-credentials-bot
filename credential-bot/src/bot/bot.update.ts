@@ -48,7 +48,7 @@ export class BotUpdate {
   async onBackToMain(@Ctx() ctx: BotContext) {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
-    await ctx.editMessageText('Main menu:');
+    await ctx.deleteMessage();
     await ctx.reply('Choose an option:', mainKeyboard());
   }
 
@@ -56,6 +56,7 @@ export class BotUpdate {
   async onGroupCreate(@Ctx() ctx: BotContext) {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
+    await ctx.deleteMessage();
     await ctx.scene.enter('create-group');
   }
 
@@ -63,6 +64,7 @@ export class BotUpdate {
   async onGroupView(@Ctx() ctx: BotContext) {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
+    await ctx.deleteMessage();
     await ctx.scene.enter('view-groups');
   }
 
@@ -70,6 +72,7 @@ export class BotUpdate {
   async onGroupEdit(@Ctx() ctx: BotContext) {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
+    await ctx.deleteMessage();
     await ctx.scene.enter('edit-group');
   }
 
@@ -77,6 +80,7 @@ export class BotUpdate {
   async onGroupDelete(@Ctx() ctx: BotContext) {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
+    await ctx.deleteMessage();
     await ctx.scene.enter('delete-group');
   }
 }

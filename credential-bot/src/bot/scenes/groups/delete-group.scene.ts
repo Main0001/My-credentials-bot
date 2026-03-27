@@ -53,6 +53,7 @@ export class DeleteGroupScene {
   async onCancelAction(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
+    await botCtx.deleteMessage();
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
     await ctx.reply('Cancelled.', groupsMenuKeyboard());
@@ -63,6 +64,7 @@ export class DeleteGroupScene {
   async onGroupSelected(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
+    await botCtx.deleteMessage();
 
     const callbackData = (ctx as any).callbackQuery.data as string;
     const groupId = callbackData.replace('del_group_', '');
@@ -91,6 +93,7 @@ export class DeleteGroupScene {
   async onConfirm(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
+    await botCtx.deleteMessage();
 
     const telegramId = ctx.from!.id.toString();
     const user = await this.usersService.findByTelegramId(telegramId);
