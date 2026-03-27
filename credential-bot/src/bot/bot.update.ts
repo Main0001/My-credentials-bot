@@ -51,4 +51,32 @@ export class BotUpdate {
     await ctx.editMessageText('Main menu:');
     await ctx.reply('Choose an option:', mainKeyboard());
   }
+
+  @Action('group_create')
+  async onGroupCreate(@Ctx() ctx: BotContext) {
+    if (!(await this.authGuard.validate(ctx))) return;
+    await ctx.answerCbQuery();
+    await ctx.scene.enter('create-group');
+  }
+
+  @Action('group_view')
+  async onGroupView(@Ctx() ctx: BotContext) {
+    if (!(await this.authGuard.validate(ctx))) return;
+    await ctx.answerCbQuery();
+    await ctx.scene.enter('view-groups');
+  }
+
+  @Action('group_edit')
+  async onGroupEdit(@Ctx() ctx: BotContext) {
+    if (!(await this.authGuard.validate(ctx))) return;
+    await ctx.answerCbQuery();
+    await ctx.scene.enter('edit-group');
+  }
+
+  @Action('group_delete')
+  async onGroupDelete(@Ctx() ctx: BotContext) {
+    if (!(await this.authGuard.validate(ctx))) return;
+    await ctx.answerCbQuery();
+    await ctx.scene.enter('delete-group');
+  }
 }

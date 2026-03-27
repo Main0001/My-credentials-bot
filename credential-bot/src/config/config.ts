@@ -24,6 +24,9 @@ export const configuration = () => ({
       .required()
       .asIntPositive(),
   },
+  groups: {
+    maxLengthGroup: env.get('MAX_LENGTH_GROUP').required().asIntPositive(),
+  },
 });
 
 export type AppConfig = ReturnType<typeof configuration>;

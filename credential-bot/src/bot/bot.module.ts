@@ -11,6 +11,10 @@ import { GroupsModule } from '../groups/groups.module';
 import { CredentialsModule } from '../credentials/credentials.module';
 import { SetupPasswordScene } from './scenes/auth/setup-password.scene';
 import { EnterPasswordScene } from './scenes/auth/enter-password.scene';
+import { CreateGroupScene } from './scenes/groups/create-group.scene';
+import { EditGroupScene } from './scenes/groups/edit-group.scene';
+import { DeleteGroupScene } from './scenes/groups/delete-group.scene';
+import { ViewGroupsScene } from './scenes/groups/view-groups.scene';
 
 @Module({
   imports: [
@@ -32,6 +36,10 @@ import { EnterPasswordScene } from './scenes/auth/enter-password.scene';
     MessageCleaner,
     SetupPasswordScene,
     EnterPasswordScene,
+    CreateGroupScene,
+    EditGroupScene,
+    DeleteGroupScene,
+    ViewGroupsScene,
   ],
 })
 export class BotModule {}
