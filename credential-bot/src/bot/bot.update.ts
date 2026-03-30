@@ -83,4 +83,52 @@ export class BotUpdate {
     await ctx.deleteMessage();
     await ctx.scene.enter('delete-group');
   }
+
+  @Action('credential_add')
+  async onCredentialAdd(@Ctx() ctx: BotContext) {
+    if (!(await this.authGuard.validate(ctx))) return;
+    await ctx.answerCbQuery();
+    await ctx.deleteMessage();
+    await ctx.scene.enter('add-credential');
+  }
+
+  @Action('credential_view_all')
+  async onCredentialViewAll(@Ctx() ctx: BotContext) {
+    if (!(await this.authGuard.validate(ctx))) return;
+    await ctx.answerCbQuery();
+    await ctx.deleteMessage();
+    await ctx.scene.enter('view-all-credentials');
+  }
+
+  @Action('credential_view_by_group')
+  async onCredentialViewByGroup(@Ctx() ctx: BotContext) {
+    if (!(await this.authGuard.validate(ctx))) return;
+    await ctx.answerCbQuery();
+    await ctx.deleteMessage();
+    await ctx.scene.enter('view-by-group');
+  }
+
+  @Action('credential_view_no_group')
+  async onCredentialViewNoGroup(@Ctx() ctx: BotContext) {
+    if (!(await this.authGuard.validate(ctx))) return;
+    await ctx.answerCbQuery();
+    await ctx.deleteMessage();
+    await ctx.scene.enter('view-without-group');
+  }
+
+  @Action('credential_edit')
+  async onCredentialEdit(@Ctx() ctx: BotContext) {
+    if (!(await this.authGuard.validate(ctx))) return;
+    await ctx.answerCbQuery();
+    await ctx.deleteMessage();
+    await ctx.scene.enter('edit-credential');
+  }
+
+  @Action('credential_delete')
+  async onCredentialDelete(@Ctx() ctx: BotContext) {
+    if (!(await this.authGuard.validate(ctx))) return;
+    await ctx.answerCbQuery();
+    await ctx.deleteMessage();
+    await ctx.scene.enter('delete-credential');
+  }
 }

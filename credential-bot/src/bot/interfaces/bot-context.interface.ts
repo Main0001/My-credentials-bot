@@ -10,6 +10,9 @@ export interface WizardState {
   attempts?: number;
   groupId?: string;
   groupName?: string;
+  credentialId?: string;
+  title?: string;
+  login?: string;
 }
 
 export interface BotContext extends Context {

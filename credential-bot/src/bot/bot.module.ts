@@ -15,6 +15,12 @@ import { CreateGroupScene } from './scenes/groups/create-group.scene';
 import { EditGroupScene } from './scenes/groups/edit-group.scene';
 import { DeleteGroupScene } from './scenes/groups/delete-group.scene';
 import { ViewGroupsScene } from './scenes/groups/view-groups.scene';
+import { AddCredentialScene } from './scenes/credentials/add-credential.scene';
+import { ViewAllCredentialsScene } from './scenes/credentials/view-all-credentials.scene';
+import { ViewByGroupScene } from './scenes/credentials/view-by-group.scene';
+import { ViewWithoutGroupScene } from './scenes/credentials/view-without-group.scene';
+import { EditCredentialScene } from './scenes/credentials/edit-credential.scene';
+import { DeleteCredentialScene } from './scenes/credentials/delete-credential.scene';
 
 @Module({
   imports: [
@@ -40,6 +46,12 @@ import { ViewGroupsScene } from './scenes/groups/view-groups.scene';
     EditGroupScene,
     DeleteGroupScene,
     ViewGroupsScene,
+    AddCredentialScene,
+    ViewAllCredentialsScene,
+    ViewByGroupScene,
+    ViewWithoutGroupScene,
+    EditCredentialScene,
+    DeleteCredentialScene,
   ],
 })
 export class BotModule {}

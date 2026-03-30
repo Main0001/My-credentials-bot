@@ -1,0 +1,98 @@
+import { Ctx, Wizard, WizardStep, Action } from 'nestjs-telegraf';
+import { Context, Markup } from 'telegraf';
+import { UsersService } from '../../../users/users.service';
+import { GroupsService } from '../../../groups/groups.service';
+import { CredentialsService } from '../../../credentials/credentials.service';
+import { credentialsMenuKeyboard } from '../../keyboards/credentials.keyboard';
+import type { BotContext } from '../../interfaces/bot-context.interface';
+
+@Wizard('view-by-group')
+export class ViewByGroupScene {
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly groupsService: GroupsService,
+    private readonly credentialsService: CredentialsService,
+  ) {}
+
+  @WizardStep(1)
+  async stepSelectGroup(@Ctx() ctx: Context) {
+    const botCtx = ctx as unknown as BotContext;
+
+    const telegramId = ctx.from!.id.toString();
+    const user = await this.usersService.findByTelegramId(telegramId);
+    const groups = await this.groupsService.findAllByUser(user!.id);
+
+    if (!groups.length) {
+      await ctx.reply('You have no groups.', credentialsMenuKeyboard());
+      await botCtx.scene.leave();
+      return;
+    }
+
+    const buttons = groups.map((g) =>
+      [Markup.button.callback(g.name, `vbg_${g.id}`)]
+    );
+    buttons.push([Markup.button.callback('Cancel', 'vbg_cancel')]);
+
+    await ctx.reply('Select group:', Markup.inlineKeyboard(buttons));
+    botCtx.wizard.next();
+  }
+
+  @Action('vbg_cancel')
+  async onCancel(@Ctx() ctx: Context) {
+    const botCtx = ctx as unknown as BotContext;
+    await botCtx.answerCbQuery();
+    await botCtx.deleteMessage();
+    await ctx.reply('Credentials menu:', credentialsMenuKeyboard());
+    await botCtx.scene.leave();
+  }
+
+  @Action(/^vbg_(?!cancel$)/)
+  async onGroupSelected(@Ctx() ctx: Context) {
+    const botCtx = ctx as unknown as BotContext;
+    await botCtx.answerCbQuery();
+    await botCtx.deleteMessage();
+
+    const callbackData = (ctx as any).callbackQuery.data as string;
+    const groupId = callbackData.replace('vbg_', '');
+
+    const telegramId = ctx.from!.id.toString();
+    const user = await this.usersService.findByTelegramId(telegramId);
+    const credentials = await this.credentialsService.findByGroup(user!.id, groupId);
+
+    if (!credentials.length) {
+      await ctx.reply('No credentials in this group.', credentialsMenuKeyboard());
+      await botCtx.scene.leave();
+      return;
+    }
+
+    const list = credentials.map((c, i) => {
+      const title = c.title ? `${c.title} — ` : '';
+      return `${i + 1}. ${title}${c.login} : ${c.password}`;
+    }).join('\n');
+
+    await ctx.reply(
+      `Credentials in group:\n\n${list}`,
+      Markup.inlineKeyboard([[Markup.button.callback('Back', 'vbg_back')]]),
+    );
+    botCtx.wizard.next();
+  }
+
+  @Action('vbg_back')
+  async onBack(@Ctx() ctx: Context) {
+    const botCtx = ctx as unknown as BotContext;
+    await botCtx.answerCbQuery();
+    await botCtx.deleteMessage();
+    await ctx.reply('Credentials menu:', credentialsMenuKeyboard());
+    await botCtx.scene.leave();
+  }
+
+  @WizardStep(2)
+  async stepWaitForSelection(@Ctx() ctx: Context) {
+    await ctx.reply('Please select a group from the buttons above.');
+  }
+
+  @WizardStep(3)
+  async stepWaitForBack(@Ctx() ctx: Context) {
+    await ctx.reply('Please use the button above.');
+  }
+}
