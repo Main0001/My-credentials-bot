@@ -1,5 +1,5 @@
-import { Ctx, Wizard, WizardStep, Message } from 'nestjs-telegraf';
-import { Context } from 'telegraf';
+import { Ctx, Wizard, WizardStep, Message, Action } from 'nestjs-telegraf';
+import { Context, Markup } from 'telegraf';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../../../users/users.service';
@@ -24,9 +24,22 @@ export class EnterPasswordScene {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds = [];
     botCtx.wizard.state.attempts = 0;
-    const sent = await ctx.reply('Please enter your password:');
+    const sent = await ctx.reply(
+      'Please enter your password:',
+      Markup.inlineKeyboard([[Markup.button.callback('Reset password', 'enter_pw_reset')]]),
+    );
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
+  }
+
+  @Action('enter_pw_reset')
+  async onReset(@Ctx() ctx: Context) {
+    const botCtx = ctx as unknown as BotContext;
+    await botCtx.answerCbQuery();
+    await botCtx.deleteMessage();
+    await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
+    botCtx.session.messageIds = [];
+    await botCtx.scene.enter('reset-password');
   }
 
   @WizardStep(2)

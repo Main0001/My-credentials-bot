@@ -3,7 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { session } from 'telegraf';
 import { BotUpdate } from './bot.update';
-import { ActivityMiddleware } from './middlewares/activity.middleware';
 import { AuthGuard } from './guards/auth.guard';
 import { MessageCleaner } from './helpers/message-cleaner';
 import { UsersModule } from '../users/users.module';
@@ -38,7 +37,6 @@ import { DeleteCredentialScene } from './scenes/credentials/delete-credential.sc
   ],
   providers: [
     BotUpdate,
-    ActivityMiddleware,
     AuthGuard,
     MessageCleaner,
     SetupPasswordScene,

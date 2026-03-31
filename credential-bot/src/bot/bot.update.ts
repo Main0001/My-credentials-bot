@@ -1,6 +1,5 @@
-import { Update, Start, Ctx, Use, Hears, Action, Next } from 'nestjs-telegraf';
+import { Update, Start, Ctx, Hears, Action } from 'nestjs-telegraf';
 import type { BotContext } from './interfaces/bot-context.interface';
-import { ActivityMiddleware } from './middlewares/activity.middleware';
 import { AuthGuard } from './guards/auth.guard';
 import { mainKeyboard } from './keyboards/main.keyboard';
 import { groupsMenuKeyboard } from './keyboards/groups.keyboard';
@@ -8,15 +7,7 @@ import { credentialsMenuKeyboard } from './keyboards/credentials.keyboard';
 
 @Update()
 export class BotUpdate {
-  constructor(
-    private readonly activityMiddleware: ActivityMiddleware,
-    private readonly authGuard: AuthGuard,
-  ) {}
-
-  @Use()
-  async onUse(@Ctx() ctx: BotContext, @Next() next: () => Promise<void>) {
-    await this.activityMiddleware.update(ctx, next);
-  }
+  constructor(private readonly authGuard: AuthGuard) {}
 
   @Start()
   async onStart(@Ctx() ctx: BotContext) {

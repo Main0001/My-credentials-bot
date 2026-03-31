@@ -43,6 +43,7 @@ export class AuthGuard {
       return false;
     }
 
+    await this.usersService.updateLastActivity(user.id);
     ctx.state.user = user;
     return true;
   }
