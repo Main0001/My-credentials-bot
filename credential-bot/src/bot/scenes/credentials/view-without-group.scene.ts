@@ -15,6 +15,7 @@ export class ViewWithoutGroupScene {
   @WizardStep(1)
   async stepShowCredentials(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
+    botCtx.session.messageIds = [];
 
     const telegramId = ctx.from!.id.toString();
     const user = await this.usersService.findByTelegramId(telegramId);
@@ -31,10 +32,11 @@ export class ViewWithoutGroupScene {
       return `${i + 1}. ${title}${c.login} : ${c.password}`;
     }).join('\n');
 
-    await ctx.reply(
+    const sent = await ctx.reply(
       `Credentials without group:\n\n${list}`,
       Markup.inlineKeyboard([[Markup.button.callback('Back', 'vwg_back')]]),
     );
+    botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 

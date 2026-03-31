@@ -29,18 +29,26 @@ export class BotUpdate {
   @Hears('Groups')
   async onGroups(@Ctx() ctx: BotContext) {
     if (!(await this.authGuard.validate(ctx))) return;
-    await ctx.reply('Groups menu:', groupsMenuKeyboard());
+    if (!ctx.session.messageIds) ctx.session.messageIds = [];
+    ctx.session.messageIds.push(ctx.message!.message_id);
+    const sent = await ctx.reply('Groups menu:', groupsMenuKeyboard());
+    ctx.session.messageIds.push(sent.message_id);
   }
 
   @Hears('Credentials')
   async onCredentials(@Ctx() ctx: BotContext) {
     if (!(await this.authGuard.validate(ctx))) return;
-    await ctx.reply('Credentials menu:', credentialsMenuKeyboard());
+    if (!ctx.session.messageIds) ctx.session.messageIds = [];
+    ctx.session.messageIds.push(ctx.message!.message_id);
+    const sent = await ctx.reply('Credentials menu:', credentialsMenuKeyboard());
+    ctx.session.messageIds.push(sent.message_id);
   }
 
   @Hears('Reset password')
   async onResetPassword(@Ctx() ctx: BotContext) {
     if (!(await this.authGuard.validate(ctx))) return;
+    if (!ctx.session.messageIds) ctx.session.messageIds = [];
+    ctx.session.messageIds.push(ctx.message!.message_id);
     await ctx.scene.enter('reset-password');
   }
 

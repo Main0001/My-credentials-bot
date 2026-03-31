@@ -15,6 +15,7 @@ export class ViewGroupsScene {
   @WizardStep(1)
   async stepShowGroups(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
+    botCtx.session.messageIds = [];
 
     const telegramId = ctx.from!.id.toString();
     const user = await this.usersService.findByTelegramId(telegramId);
@@ -27,10 +28,11 @@ export class ViewGroupsScene {
     }
 
     const list = groups.map((g, i) => `${i + 1}. ${g.name}`).join('\n');
-    await ctx.reply(
+    const sent = await ctx.reply(
       `Your groups:\n\n${list}`,
       Markup.inlineKeyboard([[Markup.button.callback('Back', 'view_groups_back')]]),
     );
+    botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 

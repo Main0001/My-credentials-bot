@@ -15,6 +15,7 @@ export class ViewAllCredentialsScene {
   @WizardStep(1)
   async stepShowCredentials(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
+    botCtx.session.messageIds = [];
 
     const telegramId = ctx.from!.id.toString();
     const user = await this.usersService.findByTelegramId(telegramId);
@@ -31,10 +32,11 @@ export class ViewAllCredentialsScene {
       return `${i + 1}. ${title}${c.login} : ${c.password}`;
     }).join('\n');
 
-    await ctx.reply(
+    const sent = await ctx.reply(
       `Your credentials:\n\n${list}`,
       Markup.inlineKeyboard([[Markup.button.callback('Back', 'view_all_cred_back')]]),
     );
+    botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 

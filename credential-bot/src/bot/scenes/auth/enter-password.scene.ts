@@ -3,6 +3,7 @@ import { Context } from 'telegraf';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../../../users/users.service';
+import { MessageCleaner } from '../../helpers/message-cleaner';
 import { mainKeyboard } from '../../keyboards/main.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
 
@@ -12,6 +13,7 @@ export class EnterPasswordScene {
 
   constructor(
     private readonly usersService: UsersService,
+    private readonly messageCleaner: MessageCleaner,
     configService: ConfigService,
   ) {
     this.maxLoginAttempts = configService.get<number>('auth.maxLoginAttempts')!;
@@ -20,17 +22,21 @@ export class EnterPasswordScene {
   @WizardStep(1)
   async stepAskPassword(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
+    botCtx.session.messageIds = [];
     botCtx.wizard.state.attempts = 0;
-    await ctx.reply('Please enter your password:');
+    const sent = await ctx.reply('Please enter your password:');
+    botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 
   @WizardStep(2)
   async stepCheckPassword(@Ctx() ctx: Context, @Message('text') text: string) {
     const botCtx = ctx as unknown as BotContext;
+    botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
-      await ctx.reply('Please enter a text password:');
+      const sent = await ctx.reply('Please enter a text password:');
+      botCtx.session.messageIds.push(sent.message_id);
       return;
     }
 
@@ -38,6 +44,8 @@ export class EnterPasswordScene {
     const user = await this.usersService.findByTelegramId(telegramId);
 
     if (!user) {
+      await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
+      botCtx.session.messageIds = [];
       await botCtx.scene.enter('setup-password');
       return;
     }
@@ -46,6 +54,8 @@ export class EnterPasswordScene {
 
     if (isValid) {
       await this.usersService.updateLastActivity(user.id);
+      await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
+      botCtx.session.messageIds = [];
       await ctx.reply('Access granted!', mainKeyboard());
       await botCtx.scene.leave();
       return;
@@ -54,12 +64,15 @@ export class EnterPasswordScene {
     botCtx.wizard.state.attempts!++;
 
     if (botCtx.wizard.state.attempts! >= this.maxLoginAttempts) {
+      await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
+      botCtx.session.messageIds = [];
       await ctx.reply('Too many failed attempts. Please try again later.');
       await botCtx.scene.leave();
       return;
     }
 
     const remaining = this.maxLoginAttempts - botCtx.wizard.state.attempts!;
-    await ctx.reply(`Wrong password. Attempts remaining: ${remaining}`);
+    const sent = await ctx.reply(`Wrong password. Attempts remaining: ${remaining}`);
+    botCtx.session.messageIds.push(sent.message_id);
   }
 }

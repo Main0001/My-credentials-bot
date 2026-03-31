@@ -17,6 +17,7 @@ export class ViewByGroupScene {
   @WizardStep(1)
   async stepSelectGroup(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
+    botCtx.session.messageIds = [];
 
     const telegramId = ctx.from!.id.toString();
     const user = await this.usersService.findByTelegramId(telegramId);
@@ -33,7 +34,8 @@ export class ViewByGroupScene {
     );
     buttons.push([Markup.button.callback('Cancel', 'vbg_cancel')]);
 
-    await ctx.reply('Select group:', Markup.inlineKeyboard(buttons));
+    const sent = await ctx.reply('Select group:', Markup.inlineKeyboard(buttons));
+    botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 
