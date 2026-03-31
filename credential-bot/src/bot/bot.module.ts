@@ -11,6 +11,7 @@ import { GroupsModule } from '../groups/groups.module';
 import { CredentialsModule } from '../credentials/credentials.module';
 import { SetupPasswordScene } from './scenes/auth/setup-password.scene';
 import { EnterPasswordScene } from './scenes/auth/enter-password.scene';
+import { ResetPasswordScene } from './scenes/auth/reset-password.scene';
 import { CreateGroupScene } from './scenes/groups/create-group.scene';
 import { EditGroupScene } from './scenes/groups/edit-group.scene';
 import { DeleteGroupScene } from './scenes/groups/delete-group.scene';
@@ -42,6 +43,7 @@ import { DeleteCredentialScene } from './scenes/credentials/delete-credential.sc
     MessageCleaner,
     SetupPasswordScene,
     EnterPasswordScene,
+    ResetPasswordScene,
     CreateGroupScene,
     EditGroupScene,
     DeleteGroupScene,
