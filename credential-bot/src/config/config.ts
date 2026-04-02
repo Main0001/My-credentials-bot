@@ -19,6 +19,13 @@ export const configuration = () => ({
       .asIntPositive(),
     saltForHash: env.get('SALT_FOR_HASH').required().asIntPositive(),
     maxLoginAttempts: env.get('MAX_LOGIN_ATTEMPTS').required().asIntPositive(),
+    maxConfirmAttempts: env
+      .get('MAX_CONFIRM_ATTEMPTS')
+      .required()
+      .asIntPositive(),
+  },
+  groups: {
+    maxLengthGroup: env.get('MAX_LENGTH_GROUP').required().asIntPositive(),
   },
 });
 

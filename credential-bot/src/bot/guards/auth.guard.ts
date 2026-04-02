@@ -1,13 +1,12 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TelegrafExecutionContext } from 'nestjs-telegraf';
-import { BotContext } from '../interfaces/bot-context.interface';
+import type { BotContext } from '../interfaces/bot-context.interface';
 import dayjs from 'dayjs';
 import { UsersService } from '../../users/users.service';
 import { MessageCleaner } from '../helpers/message-cleaner';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
+export class AuthGuard {
   private readonly inactivityTimeoutHours: number;
 
   constructor(
@@ -15,11 +14,12 @@ export class AuthGuard implements CanActivate {
     private readonly messageCleaner: MessageCleaner,
     configService: ConfigService,
   ) {
-    this.inactivityTimeoutHours = configService.get<number>('auth.inactivityTimeoutHours')!;
+    this.inactivityTimeoutHours = configService.get<number>(
+      'auth.inactivityTimeoutHours',
+    )!;
   }
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const ctx = TelegrafExecutionContext.create(context).getContext<BotContext>();
+  async validate(ctx: BotContext): Promise<boolean> {
     const telegramId = ctx.from?.id?.toString();
 
     if (!telegramId) {
@@ -43,6 +43,7 @@ export class AuthGuard implements CanActivate {
       return false;
     }
 
+    await this.usersService.updateLastActivity(user.id);
     ctx.state.user = user;
     return true;
   }
@@ -52,6 +53,8 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
-    return dayjs().diff(dayjs(lastActivityAt), 'hour') >= this.inactivityTimeoutHours;
+    return (
+      dayjs().diff(dayjs(lastActivityAt), 'hour') >= this.inactivityTimeoutHours
+    );
   }
 }
