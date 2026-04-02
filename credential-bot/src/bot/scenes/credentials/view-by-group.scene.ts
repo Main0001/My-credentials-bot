@@ -24,7 +24,7 @@ export class ViewByGroupScene {
     const groups = await this.groupsService.findAllByUser(user!.id);
 
     if (!groups.length) {
-      await ctx.reply('You have no groups.', credentialsMenuKeyboard());
+      await ctx.reply('ℹ️ You have no groups.', credentialsMenuKeyboard());
       await botCtx.scene.leave();
       return;
     }
@@ -32,9 +32,9 @@ export class ViewByGroupScene {
     const buttons = groups.map((g) =>
       [Markup.button.callback(g.name, `vbg_${g.id}`)]
     );
-    buttons.push([Markup.button.callback('Cancel', 'vbg_cancel')]);
+    buttons.push([Markup.button.callback('Cancel ↩️', 'vbg_cancel')]);
 
-    const sent = await ctx.reply('Select group:', Markup.inlineKeyboard(buttons));
+    const sent = await ctx.reply('📁 Select group:', Markup.inlineKeyboard(buttons));
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
@@ -44,7 +44,7 @@ export class ViewByGroupScene {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
     await botCtx.deleteMessage();
-    await ctx.reply('Credentials menu:', credentialsMenuKeyboard());
+    await ctx.reply('Credentials menu 🔑:', credentialsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
@@ -62,7 +62,7 @@ export class ViewByGroupScene {
     const credentials = await this.credentialsService.findByGroup(user!.id, groupId);
 
     if (!credentials.length) {
-      await ctx.reply('No credentials in this group.', credentialsMenuKeyboard());
+      await ctx.reply('ℹ️ No credentials in this group.', credentialsMenuKeyboard());
       await botCtx.scene.leave();
       return;
     }
@@ -73,8 +73,8 @@ export class ViewByGroupScene {
     }).join('\n');
 
     await ctx.reply(
-      `Credentials in group:\n\n${list}`,
-      Markup.inlineKeyboard([[Markup.button.callback('Back', 'vbg_back')]]),
+      `🔑 Credentials in group:\n\n${list}`,
+      Markup.inlineKeyboard([[Markup.button.callback('Back ↩️', 'vbg_back')]]),
     );
     botCtx.wizard.next();
   }
@@ -84,7 +84,7 @@ export class ViewByGroupScene {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
     await botCtx.deleteMessage();
-    await ctx.reply('Credentials menu:', credentialsMenuKeyboard());
+    await ctx.reply('Credentials menu 🔑:', credentialsMenuKeyboard());
     await botCtx.scene.leave();
   }
 

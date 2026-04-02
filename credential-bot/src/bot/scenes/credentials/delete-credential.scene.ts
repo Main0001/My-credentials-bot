@@ -22,7 +22,7 @@ export class DeleteCredentialScene {
     botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
-    await ctx.reply('Cancelled.', credentialsMenuKeyboard());
+    await ctx.reply('↩️ Cancelled.', credentialsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
@@ -38,10 +38,10 @@ export class DeleteCredentialScene {
     const buttons = groups.map((g) =>
       [Markup.button.callback(g.name, `del_cred_src_${g.id}`)]
     );
-    buttons.push([Markup.button.callback('Without group', 'del_cred_src_none')]);
-    buttons.push([Markup.button.callback('Cancel', 'del_cred_cancel')]);
+    buttons.push([Markup.button.callback('Without group 📄', 'del_cred_src_none')]);
+    buttons.push([Markup.button.callback('Cancel ↩️', 'del_cred_cancel')]);
 
-    const sent = await ctx.reply('Select group or "Without group":', Markup.inlineKeyboard(buttons));
+    const sent = await ctx.reply('📁 Select group or "Without group":', Markup.inlineKeyboard(buttons));
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
@@ -53,7 +53,7 @@ export class DeleteCredentialScene {
     await botCtx.deleteMessage();
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
-    await ctx.reply('Cancelled.', credentialsMenuKeyboard());
+    await ctx.reply('↩️ Cancelled.', credentialsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
@@ -86,7 +86,7 @@ export class DeleteCredentialScene {
 
   private async showCredentials(botCtx: BotContext, ctx: Context, credentials: any[]) {
     if (!credentials.length) {
-      await ctx.reply('No credentials found.', credentialsMenuKeyboard());
+      await ctx.reply('ℹ️ No credentials found.', credentialsMenuKeyboard());
       await botCtx.scene.leave();
       return;
     }
@@ -95,9 +95,9 @@ export class DeleteCredentialScene {
       const label = c.title ? `${c.title} (${c.login})` : c.login;
       return [Markup.button.callback(label, `del_cred_${c.id}`)];
     });
-    buttons.push([Markup.button.callback('Cancel', 'del_cred_cancel')]);
+    buttons.push([Markup.button.callback('Cancel ↩️', 'del_cred_cancel')]);
 
-    const sent = await ctx.reply('Select credential to delete:', Markup.inlineKeyboard(buttons));
+    const sent = await ctx.reply('🗑️ Select credential to delete:', Markup.inlineKeyboard(buttons));
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.selectStep(2);
   }
@@ -120,10 +120,10 @@ export class DeleteCredentialScene {
     botCtx.wizard.state.credentialId = callbackData.replace('del_cred_', '');
 
     const sent = await ctx.reply(
-      'Are you sure you want to delete this credential?',
+      '⚠️ Are you sure you want to delete this credential?',
       Markup.inlineKeyboard([
-        Markup.button.callback('Yes, delete', 'del_cred_confirm'),
-        Markup.button.callback('No', 'del_cred_cancel'),
+        Markup.button.callback('Yes, delete 🗑️', 'del_cred_confirm'),
+        Markup.button.callback('No ↩️', 'del_cred_cancel'),
       ]),
     );
     botCtx.session.messageIds.push(sent.message_id);
@@ -152,7 +152,7 @@ export class DeleteCredentialScene {
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
 
-    await ctx.reply('Credential deleted!', credentialsMenuKeyboard());
+    await ctx.reply('✅ Credential deleted!', credentialsMenuKeyboard());
     await botCtx.scene.leave();
   }
 

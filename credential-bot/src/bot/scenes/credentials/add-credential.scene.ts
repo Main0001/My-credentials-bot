@@ -22,7 +22,7 @@ export class AddCredentialScene {
     botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
-    await ctx.reply('Cancelled.', credentialsMenuKeyboard());
+    await ctx.reply('↩️ Cancelled.', credentialsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
@@ -31,7 +31,7 @@ export class AddCredentialScene {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds = [];
     const sent = await ctx.reply(
-      'Enter credential title (or send /skip to skip):\n\nSend /cancel to abort.',
+      '📝 Enter credential title (or send /skip to skip):\n\nSend /cancel to abort.',
     );
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
@@ -42,7 +42,7 @@ export class AddCredentialScene {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);
     botCtx.wizard.state.title = undefined;
-    const sent = await ctx.reply('Enter login:');
+    const sent = await ctx.reply('🔤 Enter login:');
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.selectStep(2);
   }
@@ -59,7 +59,7 @@ export class AddCredentialScene {
     }
 
     botCtx.wizard.state.title = text;
-    const sent = await ctx.reply('Enter login:');
+    const sent = await ctx.reply('🔤 Enter login:');
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
@@ -76,7 +76,7 @@ export class AddCredentialScene {
     }
 
     botCtx.wizard.state.login = text;
-    const sent = await ctx.reply('Enter password:');
+    const sent = await ctx.reply('🔑 Enter password:');
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
@@ -106,9 +106,9 @@ export class AddCredentialScene {
     const buttons = groups.map((g) =>
       [Markup.button.callback(g.name, `add_cred_group_${g.id}`)]
     );
-    buttons.push([Markup.button.callback('Without group', 'add_cred_no_group')]);
+    buttons.push([Markup.button.callback('Without group 📄', 'add_cred_no_group')]);
 
-    const sent = await ctx.reply('Select group:', Markup.inlineKeyboard(buttons));
+    const sent = await ctx.reply('📁 Select group:', Markup.inlineKeyboard(buttons));
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
@@ -162,7 +162,7 @@ export class AddCredentialScene {
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
 
-    await ctx.reply('Credential added!', credentialsMenuKeyboard());
+    await ctx.reply('✅ Credential added!', credentialsMenuKeyboard());
     await botCtx.scene.leave();
   }
 }

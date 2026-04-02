@@ -12,30 +12,30 @@ export class BotUpdate {
   @Start()
   async onStart(@Ctx() ctx: BotContext) {
     await ctx.reply(
-      `Hello, ${ctx.from?.first_name}! Welcome to Credential Bot.`,
+      `Hello, ${ctx.from?.first_name}! Welcome to Credential Bot 👋`,
       mainKeyboard(),
     );
   }
 
-  @Hears('Groups')
+  @Hears('Groups 📁')
   async onGroups(@Ctx() ctx: BotContext) {
     if (!(await this.authGuard.validate(ctx))) return;
     if (!ctx.session.messageIds) ctx.session.messageIds = [];
     ctx.session.messageIds.push(ctx.message!.message_id);
-    const sent = await ctx.reply('Groups menu:', groupsMenuKeyboard());
+    const sent = await ctx.reply('Groups menu 📁:', groupsMenuKeyboard());
     ctx.session.messageIds.push(sent.message_id);
   }
 
-  @Hears('Credentials')
+  @Hears('Credentials 🔑')
   async onCredentials(@Ctx() ctx: BotContext) {
     if (!(await this.authGuard.validate(ctx))) return;
     if (!ctx.session.messageIds) ctx.session.messageIds = [];
     ctx.session.messageIds.push(ctx.message!.message_id);
-    const sent = await ctx.reply('Credentials menu:', credentialsMenuKeyboard());
+    const sent = await ctx.reply('Credentials menu 🔑:', credentialsMenuKeyboard());
     ctx.session.messageIds.push(sent.message_id);
   }
 
-  @Hears('Reset password')
+  @Hears('Reset password 🔄')
   async onResetPassword(@Ctx() ctx: BotContext) {
     if (!(await this.authGuard.validate(ctx))) return;
     if (!ctx.session.messageIds) ctx.session.messageIds = [];
@@ -48,7 +48,7 @@ export class BotUpdate {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
-    await ctx.reply('Choose an option:', mainKeyboard());
+    await ctx.reply('Choose an option ⬇️:', mainKeyboard());
   }
 
   @Action('group_create')

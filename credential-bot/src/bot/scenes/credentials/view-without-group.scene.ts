@@ -22,7 +22,7 @@ export class ViewWithoutGroupScene {
     const credentials = await this.credentialsService.findWithoutGroup(user!.id);
 
     if (!credentials.length) {
-      await ctx.reply('No credentials without group.', credentialsMenuKeyboard());
+      await ctx.reply('ℹ️ No credentials without group.', credentialsMenuKeyboard());
       await botCtx.scene.leave();
       return;
     }
@@ -33,8 +33,8 @@ export class ViewWithoutGroupScene {
     }).join('\n');
 
     const sent = await ctx.reply(
-      `Credentials without group:\n\n${list}`,
-      Markup.inlineKeyboard([[Markup.button.callback('Back', 'vwg_back')]]),
+      `📄 Credentials without group:\n\n${list}`,
+      Markup.inlineKeyboard([[Markup.button.callback('Back ↩️', 'vwg_back')]]),
     );
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
@@ -45,7 +45,7 @@ export class ViewWithoutGroupScene {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
     await botCtx.deleteMessage();
-    await ctx.reply('Credentials menu:', credentialsMenuKeyboard());
+    await ctx.reply('Credentials menu 🔑:', credentialsMenuKeyboard());
     await botCtx.scene.leave();
   }
 

@@ -26,7 +26,7 @@ export class CreateGroupScene {
     botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
-    await ctx.reply('Cancelled.', groupsMenuKeyboard());
+    await ctx.reply('↩️ Cancelled.', groupsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
@@ -34,7 +34,7 @@ export class CreateGroupScene {
   async stepEnterName(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds = [];
-    const sent = await ctx.reply('Enter group name:\n\nSend /cancel to abort.');
+    const sent = await ctx.reply('📝 Enter group name:\n\nSend /cancel to abort.');
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
@@ -52,7 +52,7 @@ export class CreateGroupScene {
 
     if (text.length > this.maxLengthGroup) {
       const sent = await ctx.reply(
-        `Name is too long (max ${this.maxLengthGroup} characters). Try again:`,
+        `⚠️ Name is too long (max ${this.maxLengthGroup} characters). Try again:`,
       );
       botCtx.session.messageIds.push(sent.message_id);
       return;
@@ -65,7 +65,7 @@ export class CreateGroupScene {
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
 
-    await ctx.reply(`Group "${text}" created!`, groupsMenuKeyboard());
+    await ctx.reply(`✅ Group "${text}" created!`, groupsMenuKeyboard());
     await botCtx.scene.leave();
   }
 }

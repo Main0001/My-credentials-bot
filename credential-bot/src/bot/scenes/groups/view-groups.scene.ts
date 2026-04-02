@@ -22,15 +22,15 @@ export class ViewGroupsScene {
     const groups = await this.groupsService.findAllByUser(user!.id);
 
     if (!groups.length) {
-      await ctx.reply('You have no groups.', groupsMenuKeyboard());
+      await ctx.reply('ℹ️ You have no groups.', groupsMenuKeyboard());
       await botCtx.scene.leave();
       return;
     }
 
     const list = groups.map((g, i) => `${i + 1}. ${g.name}`).join('\n');
     const sent = await ctx.reply(
-      `Your groups:\n\n${list}`,
-      Markup.inlineKeyboard([[Markup.button.callback('Back', 'view_groups_back')]]),
+      `📁 Your groups:\n\n${list}`,
+      Markup.inlineKeyboard([[Markup.button.callback('Back ↩️', 'view_groups_back')]]),
     );
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
@@ -41,7 +41,7 @@ export class ViewGroupsScene {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
     await botCtx.deleteMessage();
-    await ctx.reply('Groups menu:', groupsMenuKeyboard());
+    await ctx.reply('Groups menu 📁:', groupsMenuKeyboard());
     await botCtx.scene.leave();
   }
 

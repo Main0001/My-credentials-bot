@@ -17,10 +17,10 @@ export class ResetPasswordScene {
     botCtx.session.messageIds = [];
 
     const sent = await ctx.reply(
-      'This will delete your account and all data (groups, credentials). Are you sure?',
+      '⚠️ This will delete your account and all data (groups, credentials). Are you sure?',
       Markup.inlineKeyboard([
-        Markup.button.callback('Yes, delete everything', 'reset_confirm'),
-        Markup.button.callback('Cancel', 'reset_cancel'),
+        Markup.button.callback('Yes, delete everything 🗑️', 'reset_confirm'),
+        Markup.button.callback('Cancel ↩️', 'reset_cancel'),
       ]),
     );
     botCtx.session.messageIds.push(sent.message_id);
@@ -32,7 +32,7 @@ export class ResetPasswordScene {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
     await botCtx.deleteMessage();
-    await ctx.reply('Reset cancelled.');
+    await ctx.reply('↩️ Reset cancelled.');
     await botCtx.scene.leave();
   }
 

@@ -26,7 +26,7 @@ export class EditGroupScene {
     botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
-    await ctx.reply('Cancelled.', groupsMenuKeyboard());
+    await ctx.reply('↩️ Cancelled.', groupsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
@@ -40,7 +40,7 @@ export class EditGroupScene {
     const groups = await this.groupsService.findAllByUser(user!.id);
 
     if (!groups.length) {
-      await ctx.reply('You have no groups.', groupsMenuKeyboard());
+      await ctx.reply('ℹ️ You have no groups.', groupsMenuKeyboard());
       await botCtx.scene.leave();
       return;
     }
@@ -48,9 +48,9 @@ export class EditGroupScene {
     const buttons = groups.map((g) =>
       [Markup.button.callback(g.name, `edit_group_${g.id}`)]
     );
-    buttons.push([Markup.button.callback('Cancel', 'edit_group_cancel')]);
+    buttons.push([Markup.button.callback('Cancel ↩️', 'edit_group_cancel')]);
 
-    const sent = await ctx.reply('Select group to edit:', Markup.inlineKeyboard(buttons));
+    const sent = await ctx.reply('✏️ Select group to edit:', Markup.inlineKeyboard(buttons));
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
@@ -62,7 +62,7 @@ export class EditGroupScene {
     await botCtx.deleteMessage();
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
-    await ctx.reply('Cancelled.', groupsMenuKeyboard());
+    await ctx.reply('↩️ Cancelled.', groupsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
@@ -76,7 +76,7 @@ export class EditGroupScene {
     const groupId = callbackData.replace('edit_group_', '');
     botCtx.wizard.state.groupId = groupId;
 
-    const sent = await ctx.reply('Enter new group name:');
+    const sent = await ctx.reply('📝 Enter new group name:');
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
@@ -102,7 +102,7 @@ export class EditGroupScene {
 
     if (text.length > this.maxLengthGroup) {
       const sent = await ctx.reply(
-        `Name is too long (max ${this.maxLengthGroup} characters). Try again:`,
+        `⚠️ Name is too long (max ${this.maxLengthGroup} characters). Try again:`,
       );
       botCtx.session.messageIds.push(sent.message_id);
       return;
@@ -116,7 +116,7 @@ export class EditGroupScene {
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
 
-    await ctx.reply(`Group renamed to "${text}"!`, groupsMenuKeyboard());
+    await ctx.reply(`✅ Group renamed to "${text}"!`, groupsMenuKeyboard());
     await botCtx.scene.leave();
   }
 }

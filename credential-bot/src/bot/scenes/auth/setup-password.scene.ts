@@ -29,7 +29,7 @@ export class SetupPasswordScene {
     botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
-    await ctx.reply('Password setup cancelled. Send /start to begin again.');
+    await ctx.reply('Password setup cancelled ❌. Send /start to begin again.');
     await botCtx.scene.leave();
   }
 
@@ -39,7 +39,7 @@ export class SetupPasswordScene {
     botCtx.session.messageIds = [];
     botCtx.wizard.state.attempts = 0;
     const sent = await ctx.reply(
-      'Welcome! Please create a password for the bot:\n\nSend /cancel to abort.',
+      '🔐 Welcome! Please create a password for the bot:\n\nSend /cancel to abort.',
     );
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
@@ -61,14 +61,14 @@ export class SetupPasswordScene {
 
     if (text.length < 6) {
       const sent = await ctx.reply(
-        'Password must be at least 6 characters. Try again:',
+        '⚠️ Password must be at least 6 characters. Try again:',
       );
       botCtx.session.messageIds.push(sent.message_id);
       return;
     }
 
     botCtx.wizard.state.password = text;
-    const sent = await ctx.reply('Confirm your password:');
+    const sent = await ctx.reply('🔁 Confirm your password:');
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
@@ -93,14 +93,14 @@ export class SetupPasswordScene {
           botCtx.session.messageIds,
         );
         botCtx.session.messageIds = [];
-        await ctx.reply('Too many failed attempts. Send /start to try again.');
+        await ctx.reply('🚫 Too many failed attempts. Send /start to try again.');
         await botCtx.scene.leave();
         return;
       }
 
       const remaining = this.maxConfirmAttempts - botCtx.wizard.state.attempts;
       const sent = await ctx.reply(
-        `Passwords do not match. Try again (${remaining} attempts left):`,
+        `❌ Passwords do not match. Try again (${remaining} attempts left):`,
       );
       botCtx.session.messageIds.push(sent.message_id);
       botCtx.wizard.selectStep(2);
@@ -116,7 +116,7 @@ export class SetupPasswordScene {
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
 
-    await ctx.reply('Password set successfully!', mainKeyboard());
+    await ctx.reply('✅ Password set successfully!', mainKeyboard());
     await botCtx.scene.leave();
   }
 }

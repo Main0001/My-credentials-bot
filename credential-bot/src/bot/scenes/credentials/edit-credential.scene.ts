@@ -9,11 +9,11 @@ import type { BotContext } from '../../interfaces/bot-context.interface';
 
 const FIELD_KEYBOARD = Markup.inlineKeyboard([
   [
-    Markup.button.callback('Title', 'edit_cred_field_title'),
-    Markup.button.callback('Login', 'edit_cred_field_login'),
+    Markup.button.callback('Title 📝', 'edit_cred_field_title'),
+    Markup.button.callback('Login 🔤', 'edit_cred_field_login'),
   ],
-  [Markup.button.callback('Password', 'edit_cred_field_password')],
-  [Markup.button.callback('Cancel', 'edit_cred_cancel')],
+  [Markup.button.callback('Password 🔑', 'edit_cred_field_password')],
+  [Markup.button.callback('Cancel ↩️', 'edit_cred_cancel')],
 ]);
 
 @Wizard('edit-credential')
@@ -33,7 +33,7 @@ export class EditCredentialScene {
     botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
-    await ctx.reply('Cancelled.', credentialsMenuKeyboard());
+    await ctx.reply('↩️ Cancelled.', credentialsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
@@ -49,10 +49,10 @@ export class EditCredentialScene {
     const buttons = groups.map((g) =>
       [Markup.button.callback(g.name, `edit_cred_src_${g.id}`)]
     );
-    buttons.push([Markup.button.callback('Without group', 'edit_cred_src_none')]);
-    buttons.push([Markup.button.callback('Cancel', 'edit_cred_cancel')]);
+    buttons.push([Markup.button.callback('Without group 📄', 'edit_cred_src_none')]);
+    buttons.push([Markup.button.callback('Cancel ↩️', 'edit_cred_cancel')]);
 
-    const sent = await ctx.reply('Select group or "Without group":', Markup.inlineKeyboard(buttons));
+    const sent = await ctx.reply('📁 Select group or "Without group":', Markup.inlineKeyboard(buttons));
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
@@ -64,7 +64,7 @@ export class EditCredentialScene {
     await botCtx.deleteMessage();
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
-    await ctx.reply('Cancelled.', credentialsMenuKeyboard());
+    await ctx.reply('↩️ Cancelled.', credentialsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
@@ -97,7 +97,7 @@ export class EditCredentialScene {
 
   private async showCredentials(botCtx: BotContext, ctx: Context, credentials: any[]) {
     if (!credentials.length) {
-      await ctx.reply('No credentials found.', credentialsMenuKeyboard());
+      await ctx.reply('ℹ️ No credentials found.', credentialsMenuKeyboard());
       await botCtx.scene.leave();
       return;
     }
@@ -106,9 +106,9 @@ export class EditCredentialScene {
       const label = c.title ? `${c.title} (${c.login})` : c.login;
       return [Markup.button.callback(label, `edit_cred_${c.id}`)];
     });
-    buttons.push([Markup.button.callback('Cancel', 'edit_cred_cancel')]);
+    buttons.push([Markup.button.callback('Cancel ↩️', 'edit_cred_cancel')]);
 
-    const sent = await ctx.reply('Select credential to edit:', Markup.inlineKeyboard(buttons));
+    const sent = await ctx.reply('✏️ Select credential to edit:', Markup.inlineKeyboard(buttons));
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.selectStep(2);
   }
@@ -130,7 +130,7 @@ export class EditCredentialScene {
     const callbackData = (ctx as any).callbackQuery.data as string;
     botCtx.wizard.state.credentialId = callbackData.replace('edit_cred_', '');
 
-    const sent = await ctx.reply('What do you want to edit?', FIELD_KEYBOARD);
+    const sent = await ctx.reply('✏️ What do you want to edit?', FIELD_KEYBOARD);
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.selectStep(4);
   }
@@ -152,7 +152,7 @@ export class EditCredentialScene {
     const callbackData = (ctx as any).callbackQuery.data as string;
     this.editField = callbackData.replace('edit_cred_field_', '');
 
-    const sent = await ctx.reply(`Enter new ${this.editField}:`);
+    const sent = await ctx.reply(`📝 Enter new ${this.editField}:`);
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.selectStep(5);
   }
@@ -195,7 +195,7 @@ export class EditCredentialScene {
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
 
-    const sent = await ctx.reply(`${this.editField} updated!\n\nWhat do you want to edit?`, FIELD_KEYBOARD);
+    const sent = await ctx.reply(`✅ ${this.editField} updated!\n\n✏️ What do you want to edit?`, FIELD_KEYBOARD);
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.selectStep(4);
   }
