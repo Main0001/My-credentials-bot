@@ -9,7 +9,7 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "build": "npx prisma generate && rm -rf dist && tsc -p tsconfig.build.json",
+    "build": "npx prisma generate && nest build",
     "deploy:migrate": "npx prisma migrate deploy",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -40,18 +40,19 @@
     "prisma": "^7.5.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "telegraf": "^4.16.3"
+    "telegraf": "^4.16.3",
+    "@nestjs/cli": "^11.0.0",
+    "@types/bcrypt": "^6.0.0",
+    "@types/node": "^22.10.7",
+    "typescript": "^5.7.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
-    "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
-    "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
-    "@types/node": "^22.10.7",
     "@types/supertest": "^6.0.2",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
@@ -65,7 +66,6 @@
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
   },
   "jest": {
