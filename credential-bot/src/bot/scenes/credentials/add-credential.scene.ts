@@ -6,8 +6,11 @@ import { CredentialsService } from '../../../credentials/credentials.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
 import { credentialsMenuKeyboard } from '../../keyboards/credentials.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { BotCommand } from '../../constants/commands.enum';
+import { CallbackAction, ActionPrefix } from '../../constants/actions.enum';
 
-@Wizard('add-credential')
+@Wizard(SceneName.ADD_CREDENTIAL)
 export class AddCredentialScene {
   constructor(
     private readonly usersService: UsersService,
@@ -16,7 +19,7 @@ export class AddCredentialScene {
     private readonly messageCleaner: MessageCleaner,
   ) {}
 
-  @Command('cancel')
+  @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);
@@ -37,7 +40,7 @@ export class AddCredentialScene {
     botCtx.wizard.next();
   }
 
-  @Command('skip')
+  @Command(BotCommand.SKIP)
   async onSkipTitle(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);
@@ -104,16 +107,16 @@ export class AddCredentialScene {
     }
 
     const buttons = groups.map((g) =>
-      [Markup.button.callback(g.name, `add_cred_group_${g.id}`)]
+      [Markup.button.callback(g.name, `${ActionPrefix.ADD_CRED_GROUP}${g.id}`)]
     );
-    buttons.push([Markup.button.callback('Without group 📄', 'add_cred_no_group')]);
+    buttons.push([Markup.button.callback('Without group 📄', CallbackAction.ADD_CRED_NO_GROUP)]);
 
     const sent = await ctx.reply('📁 Select group:', Markup.inlineKeyboard(buttons));
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 
-  @Action('add_cred_no_group')
+  @Action(CallbackAction.ADD_CRED_NO_GROUP)
   async onNoGroup(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
@@ -131,7 +134,7 @@ export class AddCredentialScene {
     await botCtx.deleteMessage();
 
     const callbackData = (ctx as any).callbackQuery.data as string;
-    const groupId = callbackData.replace('add_cred_group_', '');
+    const groupId = callbackData.replace(ActionPrefix.ADD_CRED_GROUP, '');
 
     const telegramId = ctx.from!.id.toString();
     const user = await this.usersService.findByTelegramId(telegramId);

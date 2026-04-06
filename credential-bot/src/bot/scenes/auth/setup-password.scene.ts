@@ -6,8 +6,10 @@ import { UsersService } from '../../../users/users.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
 import { mainKeyboard } from '../../keyboards/main.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { BotCommand } from '../../constants/commands.enum';
 
-@Wizard('setup-password')
+@Wizard(SceneName.SETUP_PASSWORD)
 export class SetupPasswordScene {
   private readonly saltForHash: number;
   private readonly maxConfirmAttempts: number;
@@ -23,7 +25,7 @@ export class SetupPasswordScene {
     )!;
   }
 
-  @Command('cancel')
+  @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);

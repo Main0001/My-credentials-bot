@@ -1,16 +1,17 @@
 import { Markup } from 'telegraf';
+import { CallbackAction } from '../constants/actions.enum';
 
 export const credentialsMenuKeyboard = () =>
   Markup.inlineKeyboard([
     [
-      Markup.button.callback('Add ➕', 'credential_add'),
-      Markup.button.callback('Edit ✏️', 'credential_edit'),
+      Markup.button.callback('Add ➕', CallbackAction.CREDENTIAL_ADD),
+      Markup.button.callback('Edit ✏️', CallbackAction.CREDENTIAL_EDIT),
     ],
-    [Markup.button.callback('Delete 🗑️', 'credential_delete')],
+    [Markup.button.callback('Delete 🗑️', CallbackAction.CREDENTIAL_DELETE)],
     [
-      Markup.button.callback('View all 👁️', 'credential_view_all'),
-      Markup.button.callback('View by group 📁', 'credential_view_by_group'),
+      Markup.button.callback('View all 👁️', CallbackAction.CREDENTIAL_VIEW_ALL),
+      Markup.button.callback('View by group 📁', CallbackAction.CREDENTIAL_VIEW_BY_GROUP),
     ],
-    [Markup.button.callback('View without group 📄', 'credential_view_no_group')],
-    [Markup.button.callback('Back ↩️', 'back_to_main')],
+    [Markup.button.callback('View without group 📄', CallbackAction.CREDENTIAL_VIEW_NO_GROUP)],
+    [Markup.button.callback('Back ↩️', CallbackAction.BACK_TO_MAIN)],
   ]);

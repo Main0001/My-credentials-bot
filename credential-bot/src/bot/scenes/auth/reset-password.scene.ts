@@ -3,8 +3,10 @@ import { Context, Markup } from 'telegraf';
 import { UsersService } from '../../../users/users.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { CallbackAction } from '../../constants/actions.enum';
 
-@Wizard('reset-password')
+@Wizard(SceneName.RESET_PASSWORD)
 export class ResetPasswordScene {
   constructor(
     private readonly usersService: UsersService,
@@ -19,15 +21,15 @@ export class ResetPasswordScene {
     const sent = await ctx.reply(
       '⚠️ This will delete your account and all data (groups, credentials). Are you sure?',
       Markup.inlineKeyboard([
-        Markup.button.callback('Yes, delete everything 🗑️', 'reset_confirm'),
-        Markup.button.callback('Cancel ↩️', 'reset_cancel'),
+        Markup.button.callback('Yes, delete everything 🗑️', CallbackAction.RESET_CONFIRM),
+        Markup.button.callback('Cancel ↩️', CallbackAction.RESET_CANCEL),
       ]),
     );
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 
-  @Action('reset_cancel')
+  @Action(CallbackAction.RESET_CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
@@ -36,7 +38,7 @@ export class ResetPasswordScene {
     await botCtx.scene.leave();
   }
 
-  @Action('reset_confirm')
+  @Action(CallbackAction.RESET_CONFIRM)
   async onConfirm(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
@@ -52,7 +54,7 @@ export class ResetPasswordScene {
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
 
-    await botCtx.scene.enter('setup-password');
+    await botCtx.scene.enter(SceneName.SETUP_PASSWORD);
   }
 
   @WizardStep(2)

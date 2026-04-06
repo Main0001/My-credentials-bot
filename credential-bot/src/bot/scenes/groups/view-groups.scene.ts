@@ -4,8 +4,10 @@ import { UsersService } from '../../../users/users.service';
 import { GroupsService } from '../../../groups/groups.service';
 import { groupsMenuKeyboard } from '../../keyboards/groups.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { CallbackAction } from '../../constants/actions.enum';
 
-@Wizard('view-groups')
+@Wizard(SceneName.VIEW_GROUPS)
 export class ViewGroupsScene {
   constructor(
     private readonly usersService: UsersService,
@@ -30,13 +32,13 @@ export class ViewGroupsScene {
     const list = groups.map((g, i) => `${i + 1}. ${g.name}`).join('\n');
     const sent = await ctx.reply(
       `📁 Your groups:\n\n${list}`,
-      Markup.inlineKeyboard([[Markup.button.callback('Back ↩️', 'view_groups_back')]]),
+      Markup.inlineKeyboard([[Markup.button.callback('Back ↩️', CallbackAction.VIEW_GROUPS_BACK)]]),
     );
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 
-  @Action('view_groups_back')
+  @Action(CallbackAction.VIEW_GROUPS_BACK)
   async onBack(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();

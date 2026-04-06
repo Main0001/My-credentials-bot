@@ -6,8 +6,10 @@ import { GroupsService } from '../../../groups/groups.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
 import { groupsMenuKeyboard } from '../../keyboards/groups.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { BotCommand } from '../../constants/commands.enum';
 
-@Wizard('create-group')
+@Wizard(SceneName.CREATE_GROUP)
 export class CreateGroupScene {
   private readonly maxLengthGroup: number;
 
@@ -20,7 +22,7 @@ export class CreateGroupScene {
     this.maxLengthGroup = configService.get<number>('groups.maxLengthGroup')!;
   }
 
-  @Command('cancel')
+  @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);

@@ -6,8 +6,10 @@ import { UsersService } from '../../../users/users.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
 import { mainKeyboard } from '../../keyboards/main.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { CallbackAction } from '../../constants/actions.enum';
 
-@Wizard('enter-password')
+@Wizard(SceneName.ENTER_PASSWORD)
 export class EnterPasswordScene {
   private readonly maxLoginAttempts: number;
 
@@ -27,21 +29,21 @@ export class EnterPasswordScene {
     const sent = await ctx.reply(
       '🔐 Please enter your password:',
       Markup.inlineKeyboard([
-        [Markup.button.callback('Reset password 🔄', 'enter_pw_reset')],
+        [Markup.button.callback('Reset password 🔄', CallbackAction.ENTER_PW_RESET)],
       ]),
     );
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 
-  @Action('enter_pw_reset')
+  @Action(CallbackAction.ENTER_PW_RESET)
   async onReset(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
     await botCtx.deleteMessage();
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
-    await botCtx.scene.enter('reset-password');
+    await botCtx.scene.enter(SceneName.RESET_PASSWORD);
   }
 
   @WizardStep(2)
@@ -64,7 +66,7 @@ export class EnterPasswordScene {
         botCtx.session.messageIds,
       );
       botCtx.session.messageIds = [];
-      await botCtx.scene.enter('setup-password');
+      await botCtx.scene.enter(SceneName.SETUP_PASSWORD);
       return;
     }
 

@@ -4,8 +4,10 @@ import { UsersService } from '../../../users/users.service';
 import { CredentialsService } from '../../../credentials/credentials.service';
 import { credentialsMenuKeyboard } from '../../keyboards/credentials.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { CallbackAction } from '../../constants/actions.enum';
 
-@Wizard('view-all-credentials')
+@Wizard(SceneName.VIEW_ALL_CREDENTIALS)
 export class ViewAllCredentialsScene {
   constructor(
     private readonly usersService: UsersService,
@@ -34,13 +36,13 @@ export class ViewAllCredentialsScene {
 
     const sent = await ctx.reply(
       `🔑 Your credentials:\n\n${list}`,
-      Markup.inlineKeyboard([[Markup.button.callback('Back ↩️', 'view_all_cred_back')]]),
+      Markup.inlineKeyboard([[Markup.button.callback('Back ↩️', CallbackAction.VIEW_ALL_CRED_BACK)]]),
     );
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 
-  @Action('view_all_cred_back')
+  @Action(CallbackAction.VIEW_ALL_CRED_BACK)
   async onBack(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
