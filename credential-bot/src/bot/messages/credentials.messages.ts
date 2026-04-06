@@ -1,0 +1,29 @@
+export const CREDENTIALS = {
+  MENU: 'Credentials menu 🔑:',
+  NO_CREDENTIALS: 'ℹ️ You have no credentials.',
+  NO_CREDENTIALS_FOUND: 'ℹ️ No credentials found.',
+  NO_CREDENTIALS_IN_GROUP: 'ℹ️ No credentials in this group.',
+  NO_CREDENTIALS_WITHOUT_GROUP: 'ℹ️ No credentials without group.',
+
+  ADD_TITLE_PROMPT: '📝 Enter credential title (or send /skip to skip):\n\nSend /cancel to abort.',
+  ENTER_LOGIN: '🔤 Enter login:',
+  ENTER_PASSWORD: '🔑 Enter password:',
+  SELECT_GROUP: '📁 Select group:',
+  SELECT_GROUP_OR_NONE: '📁 Select group or "Without group":',
+  ADDED: '✅ Credential added!',
+
+  SELECT_TO_EDIT: '✏️ Select credential to edit:',
+  WHAT_TO_EDIT: '✏️ What do you want to edit?',
+  ENTER_NEW_FIELD: (field: string) => `📝 Enter new ${field}:`,
+  ENTER_TEXT_FIELD: (field: string) => `Please enter a text ${field}:`,
+  FIELD_UPDATED: (field: string) =>
+    `✅ ${field} updated!\n\n✏️ What do you want to edit?`,
+
+  SELECT_TO_DELETE: '🗑️ Select credential to delete:',
+  DELETE_CONFIRM: '⚠️ Are you sure you want to delete this credential?',
+  DELETED: '✅ Credential deleted!',
+
+  LIST_ALL: (list: string) => `🔑 Your credentials:\n\n${list}`,
+  LIST_BY_GROUP: (list: string) => `🔑 Credentials in group:\n\n${list}`,
+  LIST_WITHOUT_GROUP: (list: string) => `📄 Credentials without group:\n\n${list}`,
+};
