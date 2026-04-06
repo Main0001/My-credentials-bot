@@ -93,7 +93,9 @@ export class SetupPasswordScene {
           botCtx.session.messageIds,
         );
         botCtx.session.messageIds = [];
-        await ctx.reply('🚫 Too many failed attempts. Send /start to try again.');
+        await ctx.reply(
+          '🚫 Too many failed attempts. Send /start to try again.',
+        );
         await botCtx.scene.leave();
         return;
       }

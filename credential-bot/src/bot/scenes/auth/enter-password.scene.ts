@@ -26,7 +26,9 @@ export class EnterPasswordScene {
     botCtx.wizard.state.attempts = 0;
     const sent = await ctx.reply(
       '🔐 Please enter your password:',
-      Markup.inlineKeyboard([[Markup.button.callback('Reset password 🔄', 'enter_pw_reset')]]),
+      Markup.inlineKeyboard([
+        [Markup.button.callback('Reset password 🔄', 'enter_pw_reset')],
+      ]),
     );
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
@@ -57,7 +59,10 @@ export class EnterPasswordScene {
     const user = await this.usersService.findByTelegramId(telegramId);
 
     if (!user) {
-      await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
+      await this.messageCleaner.deleteMessages(
+        botCtx,
+        botCtx.session.messageIds,
+      );
       botCtx.session.messageIds = [];
       await botCtx.scene.enter('setup-password');
       return;
@@ -67,17 +72,25 @@ export class EnterPasswordScene {
 
     if (isValid) {
       await this.usersService.updateLastActivity(user.id);
-      await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
+      await this.messageCleaner.deleteMessages(
+        botCtx,
+        botCtx.session.messageIds,
+      );
       botCtx.session.messageIds = [];
       await ctx.reply('✅ Access granted!', mainKeyboard());
       await botCtx.scene.leave();
       return;
     }
 
-    botCtx.wizard.state.attempts!++;
+    if (botCtx.wizard.state.attempts) {
+      botCtx.wizard.state.attempts += 1;
+    }
 
     if (botCtx.wizard.state.attempts! >= this.maxLoginAttempts) {
-      await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
+      await this.messageCleaner.deleteMessages(
+        botCtx,
+        botCtx.session.messageIds,
+      );
       botCtx.session.messageIds = [];
       await ctx.reply('🚫 Too many failed attempts. Please try again later.');
       await botCtx.scene.leave();
@@ -85,7 +98,9 @@ export class EnterPasswordScene {
     }
 
     const remaining = this.maxLoginAttempts - botCtx.wizard.state.attempts!;
-    const sent = await ctx.reply(`❌ Wrong password. Attempts remaining: ${remaining}`);
+    const sent = await ctx.reply(
+      `❌ Wrong password. Attempts remaining: ${remaining}`,
+    );
     botCtx.session.messageIds.push(sent.message_id);
   }
 }
