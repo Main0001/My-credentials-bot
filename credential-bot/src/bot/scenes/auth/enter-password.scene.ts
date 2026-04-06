@@ -82,9 +82,7 @@ export class EnterPasswordScene {
       return;
     }
 
-    if (botCtx.wizard.state.attempts) {
-      botCtx.wizard.state.attempts += 1;
-    }
+    botCtx.wizard.state.attempts = (botCtx.wizard.state.attempts ?? 0) + 1;
 
     if (botCtx.wizard.state.attempts! >= this.maxLoginAttempts) {
       await this.messageCleaner.deleteMessages(
