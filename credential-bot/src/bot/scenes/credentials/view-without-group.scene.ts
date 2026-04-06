@@ -4,8 +4,10 @@ import { UsersService } from '../../../users/users.service';
 import { CredentialsService } from '../../../credentials/credentials.service';
 import { credentialsMenuKeyboard } from '../../keyboards/credentials.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { CallbackAction } from '../../constants/actions.enum';
 
-@Wizard('view-without-group')
+@Wizard(SceneName.VIEW_WITHOUT_GROUP)
 export class ViewWithoutGroupScene {
   constructor(
     private readonly usersService: UsersService,
@@ -34,13 +36,13 @@ export class ViewWithoutGroupScene {
 
     const sent = await ctx.reply(
       `📄 Credentials without group:\n\n${list}`,
-      Markup.inlineKeyboard([[Markup.button.callback('Back ↩️', 'vwg_back')]]),
+      Markup.inlineKeyboard([[Markup.button.callback('Back ↩️', CallbackAction.VWG_BACK)]]),
     );
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 
-  @Action('vwg_back')
+  @Action(CallbackAction.VWG_BACK)
   async onBack(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();

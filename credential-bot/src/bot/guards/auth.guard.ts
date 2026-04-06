@@ -4,6 +4,7 @@ import type { BotContext } from '../interfaces/bot-context.interface';
 import dayjs from 'dayjs';
 import { UsersService } from '../../users/users.service';
 import { MessageCleaner } from '../helpers/message-cleaner';
+import { SceneName } from '../constants/scenes.enum';
 
 @Injectable()
 export class AuthGuard {
@@ -29,7 +30,7 @@ export class AuthGuard {
     const user = await this.usersService.findByTelegramId(telegramId);
 
     if (!user) {
-      await ctx.scene.enter('setup-password');
+      await ctx.scene.enter(SceneName.SETUP_PASSWORD);
       return false;
     }
 
@@ -39,7 +40,7 @@ export class AuthGuard {
         ctx.session.messageIds = [];
       }
 
-      await ctx.scene.enter('enter-password');
+      await ctx.scene.enter(SceneName.ENTER_PASSWORD);
       return false;
     }
 

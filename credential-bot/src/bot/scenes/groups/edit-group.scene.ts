@@ -6,8 +6,11 @@ import { GroupsService } from '../../../groups/groups.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
 import { groupsMenuKeyboard } from '../../keyboards/groups.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { BotCommand } from '../../constants/commands.enum';
+import { CallbackAction, ActionPrefix } from '../../constants/actions.enum';
 
-@Wizard('edit-group')
+@Wizard(SceneName.EDIT_GROUP)
 export class EditGroupScene {
   private readonly maxLengthGroup: number;
 
@@ -20,7 +23,7 @@ export class EditGroupScene {
     this.maxLengthGroup = configService.get<number>('groups.maxLengthGroup')!;
   }
 
-  @Command('cancel')
+  @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);
@@ -46,9 +49,9 @@ export class EditGroupScene {
     }
 
     const buttons = groups.map((g) =>
-      [Markup.button.callback(g.name, `edit_group_${g.id}`)]
+      [Markup.button.callback(g.name, `${ActionPrefix.EDIT_GROUP}${g.id}`)]
     );
-    buttons.push([Markup.button.callback('Cancel ↩️', 'edit_group_cancel')]);
+    buttons.push([Markup.button.callback('Cancel ↩️', CallbackAction.EDIT_GROUP_CANCEL)]);
 
     const sent = await ctx.reply('✏️ Select group to edit:', Markup.inlineKeyboard(buttons));
     botCtx.session.messageIds.push(sent.message_id);
@@ -73,7 +76,7 @@ export class EditGroupScene {
     await botCtx.deleteMessage();
 
     const callbackData = (ctx as any).callbackQuery.data as string;
-    const groupId = callbackData.replace('edit_group_', '');
+    const groupId = callbackData.replace(ActionPrefix.EDIT_GROUP, '');
     botCtx.wizard.state.groupId = groupId;
 
     const sent = await ctx.reply('📝 Enter new group name:');

@@ -5,8 +5,10 @@ import { GroupsService } from '../../../groups/groups.service';
 import { CredentialsService } from '../../../credentials/credentials.service';
 import { credentialsMenuKeyboard } from '../../keyboards/credentials.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { CallbackAction, ActionPrefix } from '../../constants/actions.enum';
 
-@Wizard('view-by-group')
+@Wizard(SceneName.VIEW_BY_GROUP)
 export class ViewByGroupScene {
   constructor(
     private readonly usersService: UsersService,
@@ -30,16 +32,16 @@ export class ViewByGroupScene {
     }
 
     const buttons = groups.map((g) =>
-      [Markup.button.callback(g.name, `vbg_${g.id}`)]
+      [Markup.button.callback(g.name, `${ActionPrefix.VBG}${g.id}`)]
     );
-    buttons.push([Markup.button.callback('Cancel ↩️', 'vbg_cancel')]);
+    buttons.push([Markup.button.callback('Cancel ↩️', CallbackAction.VBG_CANCEL)]);
 
     const sent = await ctx.reply('📁 Select group:', Markup.inlineKeyboard(buttons));
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 
-  @Action('vbg_cancel')
+  @Action(CallbackAction.VBG_CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
@@ -55,7 +57,7 @@ export class ViewByGroupScene {
     await botCtx.deleteMessage();
 
     const callbackData = (ctx as any).callbackQuery.data as string;
-    const groupId = callbackData.replace('vbg_', '');
+    const groupId = callbackData.replace(ActionPrefix.VBG, '');
 
     const telegramId = ctx.from!.id.toString();
     const user = await this.usersService.findByTelegramId(telegramId);
@@ -74,12 +76,12 @@ export class ViewByGroupScene {
 
     await ctx.reply(
       `🔑 Credentials in group:\n\n${list}`,
-      Markup.inlineKeyboard([[Markup.button.callback('Back ↩️', 'vbg_back')]]),
+      Markup.inlineKeyboard([[Markup.button.callback('Back ↩️', CallbackAction.VBG_BACK)]]),
     );
     botCtx.wizard.next();
   }
 
-  @Action('vbg_back')
+  @Action(CallbackAction.VBG_BACK)
   async onBack(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();

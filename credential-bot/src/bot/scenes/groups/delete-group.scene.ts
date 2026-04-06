@@ -5,8 +5,11 @@ import { GroupsService } from '../../../groups/groups.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
 import { groupsMenuKeyboard } from '../../keyboards/groups.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { BotCommand } from '../../constants/commands.enum';
+import { CallbackAction, ActionPrefix } from '../../constants/actions.enum';
 
-@Wizard('delete-group')
+@Wizard(SceneName.DELETE_GROUP)
 export class DeleteGroupScene {
   constructor(
     private readonly usersService: UsersService,
@@ -14,7 +17,7 @@ export class DeleteGroupScene {
     private readonly messageCleaner: MessageCleaner,
   ) {}
 
-  @Command('cancel')
+  @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);
@@ -40,9 +43,9 @@ export class DeleteGroupScene {
     }
 
     const buttons = groups.map((g) =>
-      [Markup.button.callback(g.name, `del_group_${g.id}`)]
+      [Markup.button.callback(g.name, `${ActionPrefix.DEL_GROUP}${g.id}`)]
     );
-    buttons.push([Markup.button.callback('Cancel ↩️', 'del_group_cancel')]);
+    buttons.push([Markup.button.callback('Cancel ↩️', CallbackAction.DEL_GROUP_CANCEL)]);
 
     const sent = await ctx.reply('🗑️ Select group to delete:', Markup.inlineKeyboard(buttons));
     botCtx.session.messageIds.push(sent.message_id);
@@ -67,14 +70,14 @@ export class DeleteGroupScene {
     await botCtx.deleteMessage();
 
     const callbackData = (ctx as any).callbackQuery.data as string;
-    const groupId = callbackData.replace('del_group_', '');
+    const groupId = callbackData.replace(ActionPrefix.DEL_GROUP, '');
     botCtx.wizard.state.groupId = groupId;
 
     const sent = await ctx.reply(
       '⚠️ Are you sure? Credentials in this group will be ungrouped.',
       Markup.inlineKeyboard([
-        Markup.button.callback('Yes, delete 🗑️', 'del_group_confirm'),
-        Markup.button.callback('No ↩️', 'del_group_cancel'),
+        Markup.button.callback('Yes, delete 🗑️', CallbackAction.DEL_GROUP_CONFIRM),
+        Markup.button.callback('No ↩️', CallbackAction.DEL_GROUP_CANCEL),
       ]),
     );
     botCtx.session.messageIds.push(sent.message_id);

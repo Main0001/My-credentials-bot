@@ -6,17 +6,20 @@ import { CredentialsService } from '../../../credentials/credentials.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
 import { credentialsMenuKeyboard } from '../../keyboards/credentials.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { BotCommand } from '../../constants/commands.enum';
+import { CallbackAction, ActionPrefix } from '../../constants/actions.enum';
 
 const FIELD_KEYBOARD = Markup.inlineKeyboard([
   [
-    Markup.button.callback('Title 📝', 'edit_cred_field_title'),
-    Markup.button.callback('Login 🔤', 'edit_cred_field_login'),
+    Markup.button.callback('Title 📝', CallbackAction.EDIT_CRED_FIELD_TITLE),
+    Markup.button.callback('Login 🔤', CallbackAction.EDIT_CRED_FIELD_LOGIN),
   ],
-  [Markup.button.callback('Password 🔑', 'edit_cred_field_password')],
-  [Markup.button.callback('Cancel ↩️', 'edit_cred_cancel')],
+  [Markup.button.callback('Password 🔑', CallbackAction.EDIT_CRED_FIELD_PASSWORD)],
+  [Markup.button.callback('Cancel ↩️', CallbackAction.EDIT_CRED_CANCEL)],
 ]);
 
-@Wizard('edit-credential')
+@Wizard(SceneName.EDIT_CREDENTIAL)
 export class EditCredentialScene {
   private editField: string = '';
 
@@ -27,7 +30,7 @@ export class EditCredentialScene {
     private readonly messageCleaner: MessageCleaner,
   ) {}
 
-  @Command('cancel')
+  @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);
@@ -47,17 +50,17 @@ export class EditCredentialScene {
     const groups = await this.groupsService.findAllByUser(user!.id);
 
     const buttons = groups.map((g) =>
-      [Markup.button.callback(g.name, `edit_cred_src_${g.id}`)]
+      [Markup.button.callback(g.name, `${ActionPrefix.EDIT_CRED_SRC}${g.id}`)]
     );
-    buttons.push([Markup.button.callback('Without group 📄', 'edit_cred_src_none')]);
-    buttons.push([Markup.button.callback('Cancel ↩️', 'edit_cred_cancel')]);
+    buttons.push([Markup.button.callback('Without group 📄', CallbackAction.EDIT_CRED_SRC_NONE)]);
+    buttons.push([Markup.button.callback('Cancel ↩️', CallbackAction.EDIT_CRED_CANCEL)]);
 
     const sent = await ctx.reply('📁 Select group or "Without group":', Markup.inlineKeyboard(buttons));
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 
-  @Action('edit_cred_cancel')
+  @Action(CallbackAction.EDIT_CRED_CANCEL)
   async onCancelAction(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
@@ -68,7 +71,7 @@ export class EditCredentialScene {
     await botCtx.scene.leave();
   }
 
-  @Action('edit_cred_src_none')
+  @Action(CallbackAction.EDIT_CRED_SRC_NONE)
   async onSourceNone(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
@@ -87,7 +90,7 @@ export class EditCredentialScene {
     await botCtx.deleteMessage();
 
     const callbackData = (ctx as any).callbackQuery.data as string;
-    const groupId = callbackData.replace('edit_cred_src_', '');
+    const groupId = callbackData.replace(ActionPrefix.EDIT_CRED_SRC, '');
 
     const telegramId = ctx.from!.id.toString();
     const user = await this.usersService.findByTelegramId(telegramId);
@@ -104,9 +107,9 @@ export class EditCredentialScene {
 
     const buttons = credentials.map((c) => {
       const label = c.title ? `${c.title} (${c.login})` : c.login;
-      return [Markup.button.callback(label, `edit_cred_${c.id}`)];
+      return [Markup.button.callback(label, `${ActionPrefix.EDIT_CRED}${c.id}`)];
     });
-    buttons.push([Markup.button.callback('Cancel ↩️', 'edit_cred_cancel')]);
+    buttons.push([Markup.button.callback('Cancel ↩️', CallbackAction.EDIT_CRED_CANCEL)]);
 
     const sent = await ctx.reply('✏️ Select credential to edit:', Markup.inlineKeyboard(buttons));
     botCtx.session.messageIds.push(sent.message_id);
@@ -128,7 +131,7 @@ export class EditCredentialScene {
     await botCtx.deleteMessage();
 
     const callbackData = (ctx as any).callbackQuery.data as string;
-    botCtx.wizard.state.credentialId = callbackData.replace('edit_cred_', '');
+    botCtx.wizard.state.credentialId = callbackData.replace(ActionPrefix.EDIT_CRED, '');
 
     const sent = await ctx.reply('✏️ What do you want to edit?', FIELD_KEYBOARD);
     botCtx.session.messageIds.push(sent.message_id);
@@ -150,7 +153,7 @@ export class EditCredentialScene {
     await botCtx.deleteMessage();
 
     const callbackData = (ctx as any).callbackQuery.data as string;
-    this.editField = callbackData.replace('edit_cred_field_', '');
+    this.editField = callbackData.replace(ActionPrefix.EDIT_CRED_FIELD, '');
 
     const sent = await ctx.reply(`📝 Enter new ${this.editField}:`);
     botCtx.session.messageIds.push(sent.message_id);
