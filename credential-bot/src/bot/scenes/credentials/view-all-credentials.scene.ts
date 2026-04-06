@@ -6,6 +6,9 @@ import { credentialsMenuKeyboard } from '../../keyboards/credentials.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
 import { SceneName } from '../../constants/scenes.enum';
 import { CallbackAction } from '../../constants/actions.enum';
+import { CREDENTIALS } from '../../messages/credentials.messages';
+import { COMMON } from '../../messages/common.messages';
+import { KEYBOARDS } from '../../messages/keyboards.messages';
 
 @Wizard(SceneName.VIEW_ALL_CREDENTIALS)
 export class ViewAllCredentialsScene {
@@ -24,7 +27,7 @@ export class ViewAllCredentialsScene {
     const credentials = await this.credentialsService.findAllByUser(user!.id);
 
     if (!credentials.length) {
-      await ctx.reply('ℹ️ You have no credentials.', credentialsMenuKeyboard());
+      await ctx.reply(CREDENTIALS.NO_CREDENTIALS, credentialsMenuKeyboard());
       await botCtx.scene.leave();
       return;
     }
@@ -35,8 +38,8 @@ export class ViewAllCredentialsScene {
     }).join('\n');
 
     const sent = await ctx.reply(
-      `🔑 Your credentials:\n\n${list}`,
-      Markup.inlineKeyboard([[Markup.button.callback('Back ↩️', CallbackAction.VIEW_ALL_CRED_BACK)]]),
+      CREDENTIALS.LIST_ALL(list),
+      Markup.inlineKeyboard([[Markup.button.callback(KEYBOARDS.BACK, CallbackAction.VIEW_ALL_CRED_BACK)]]),
     );
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
@@ -47,12 +50,12 @@ export class ViewAllCredentialsScene {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
     await botCtx.deleteMessage();
-    await ctx.reply('Credentials menu 🔑:', credentialsMenuKeyboard());
+    await ctx.reply(CREDENTIALS.MENU, credentialsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
   @WizardStep(2)
   async stepWait(@Ctx() ctx: Context) {
-    await ctx.reply('Please use the button above.');
+    await ctx.reply(COMMON.USE_BUTTON_ABOVE);
   }
 }

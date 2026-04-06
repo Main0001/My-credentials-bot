@@ -6,6 +6,10 @@ import { groupsMenuKeyboard } from './keyboards/groups.keyboard';
 import { credentialsMenuKeyboard } from './keyboards/credentials.keyboard';
 import { SceneName } from './constants/scenes.enum';
 import { CallbackAction } from './constants/actions.enum';
+import { AUTH } from './messages/auth.messages';
+import { GROUPS } from './messages/groups.messages';
+import { CREDENTIALS } from './messages/credentials.messages';
+import { KEYBOARDS } from './messages/keyboards.messages';
 
 @Update()
 export class BotUpdate {
@@ -14,30 +18,30 @@ export class BotUpdate {
   @Start()
   async onStart(@Ctx() ctx: BotContext) {
     await ctx.reply(
-      `Hello, ${ctx.from?.first_name}! Welcome to Credential Bot 👋`,
+      AUTH.WELCOME(ctx.from?.first_name ?? ''),
       mainKeyboard(),
     );
   }
 
-  @Hears('Groups 📁')
+  @Hears(KEYBOARDS.GROUPS)
   async onGroups(@Ctx() ctx: BotContext) {
     if (!(await this.authGuard.validate(ctx))) return;
     if (!ctx.session.messageIds) ctx.session.messageIds = [];
     ctx.session.messageIds.push(ctx.message!.message_id);
-    const sent = await ctx.reply('Groups menu 📁:', groupsMenuKeyboard());
+    const sent = await ctx.reply(GROUPS.MENU, groupsMenuKeyboard());
     ctx.session.messageIds.push(sent.message_id);
   }
 
-  @Hears('Credentials 🔑')
+  @Hears(KEYBOARDS.CREDENTIALS)
   async onCredentials(@Ctx() ctx: BotContext) {
     if (!(await this.authGuard.validate(ctx))) return;
     if (!ctx.session.messageIds) ctx.session.messageIds = [];
     ctx.session.messageIds.push(ctx.message!.message_id);
-    const sent = await ctx.reply('Credentials menu 🔑:', credentialsMenuKeyboard());
+    const sent = await ctx.reply(CREDENTIALS.MENU, credentialsMenuKeyboard());
     ctx.session.messageIds.push(sent.message_id);
   }
 
-  @Hears('Reset password 🔄')
+  @Hears(KEYBOARDS.RESET_PASSWORD)
   async onResetPassword(@Ctx() ctx: BotContext) {
     if (!(await this.authGuard.validate(ctx))) return;
     if (!ctx.session.messageIds) ctx.session.messageIds = [];
@@ -50,7 +54,7 @@ export class BotUpdate {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
-    await ctx.reply('Choose an option ⬇️:', mainKeyboard());
+    await ctx.reply(KEYBOARDS.CHOOSE_OPTION, mainKeyboard());
   }
 
   @Action(CallbackAction.GROUP_CREATE)

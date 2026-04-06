@@ -5,6 +5,9 @@ import { MessageCleaner } from '../../helpers/message-cleaner';
 import type { BotContext } from '../../interfaces/bot-context.interface';
 import { SceneName } from '../../constants/scenes.enum';
 import { CallbackAction } from '../../constants/actions.enum';
+import { AUTH } from '../../messages/auth.messages';
+import { COMMON } from '../../messages/common.messages';
+import { KEYBOARDS } from '../../messages/keyboards.messages';
 
 @Wizard(SceneName.RESET_PASSWORD)
 export class ResetPasswordScene {
@@ -19,10 +22,10 @@ export class ResetPasswordScene {
     botCtx.session.messageIds = [];
 
     const sent = await ctx.reply(
-      '⚠️ This will delete your account and all data (groups, credentials). Are you sure?',
+      AUTH.RESET_CONFIRM_PROMPT,
       Markup.inlineKeyboard([
-        Markup.button.callback('Yes, delete everything 🗑️', CallbackAction.RESET_CONFIRM),
-        Markup.button.callback('Cancel ↩️', CallbackAction.RESET_CANCEL),
+        Markup.button.callback(KEYBOARDS.YES_DELETE_EVERYTHING, CallbackAction.RESET_CONFIRM),
+        Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.RESET_CANCEL),
       ]),
     );
     botCtx.session.messageIds.push(sent.message_id);
@@ -34,7 +37,7 @@ export class ResetPasswordScene {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
     await botCtx.deleteMessage();
-    await ctx.reply('↩️ Reset cancelled.');
+    await ctx.reply(AUTH.RESET_CANCELLED);
     await botCtx.scene.leave();
   }
 
@@ -59,6 +62,6 @@ export class ResetPasswordScene {
 
   @WizardStep(2)
   async stepWait(@Ctx() ctx: Context) {
-    await ctx.reply('Please use the buttons above.');
+    await ctx.reply(COMMON.USE_BUTTONS_ABOVE);
   }
 }
