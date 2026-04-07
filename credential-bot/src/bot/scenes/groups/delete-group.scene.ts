@@ -5,8 +5,14 @@ import { GroupsService } from '../../../groups/groups.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
 import { groupsMenuKeyboard } from '../../keyboards/groups.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { BotCommand } from '../../constants/commands.enum';
+import { CallbackAction, ActionPrefix } from '../../constants/actions.enum';
+import { GROUPS } from '../../messages/groups.messages';
+import { COMMON } from '../../messages/common.messages';
+import { KEYBOARDS } from '../../messages/keyboards.messages';
 
-@Wizard('delete-group')
+@Wizard(SceneName.DELETE_GROUP)
 export class DeleteGroupScene {
   constructor(
     private readonly usersService: UsersService,
@@ -14,13 +20,13 @@ export class DeleteGroupScene {
     private readonly messageCleaner: MessageCleaner,
   ) {}
 
-  @Command('cancel')
+  @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
-    await ctx.reply('↩️ Cancelled.', groupsMenuKeyboard());
+    await ctx.reply(COMMON.CANCELLED, groupsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
@@ -34,17 +40,17 @@ export class DeleteGroupScene {
     const groups = await this.groupsService.findAllByUser(user!.id);
 
     if (!groups.length) {
-      await ctx.reply('ℹ️ You have no groups.', groupsMenuKeyboard());
+      await ctx.reply(GROUPS.NO_GROUPS, groupsMenuKeyboard());
       await botCtx.scene.leave();
       return;
     }
 
     const buttons = groups.map((g) =>
-      [Markup.button.callback(g.name, `del_group_${g.id}`)]
+      [Markup.button.callback(g.name, `${ActionPrefix.DEL_GROUP}${g.id}`)]
     );
-    buttons.push([Markup.button.callback('Cancel ↩️', 'del_group_cancel')]);
+    buttons.push([Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.DEL_GROUP_CANCEL)]);
 
-    const sent = await ctx.reply('🗑️ Select group to delete:', Markup.inlineKeyboard(buttons));
+    const sent = await ctx.reply(GROUPS.SELECT_TO_DELETE, Markup.inlineKeyboard(buttons));
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
@@ -56,7 +62,7 @@ export class DeleteGroupScene {
     await botCtx.deleteMessage();
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
-    await ctx.reply('↩️ Cancelled.', groupsMenuKeyboard());
+    await ctx.reply(COMMON.CANCELLED, groupsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
@@ -67,14 +73,14 @@ export class DeleteGroupScene {
     await botCtx.deleteMessage();
 
     const callbackData = (ctx as any).callbackQuery.data as string;
-    const groupId = callbackData.replace('del_group_', '');
+    const groupId = callbackData.replace(ActionPrefix.DEL_GROUP, '');
     botCtx.wizard.state.groupId = groupId;
 
     const sent = await ctx.reply(
-      '⚠️ Are you sure? Credentials in this group will be ungrouped.',
+      GROUPS.DELETE_CONFIRM,
       Markup.inlineKeyboard([
-        Markup.button.callback('Yes, delete 🗑️', 'del_group_confirm'),
-        Markup.button.callback('No ↩️', 'del_group_cancel'),
+        Markup.button.callback(KEYBOARDS.YES_DELETE, CallbackAction.DEL_GROUP_CONFIRM),
+        Markup.button.callback(KEYBOARDS.NO, CallbackAction.DEL_GROUP_CANCEL),
       ]),
     );
     botCtx.session.messageIds.push(sent.message_id);
@@ -85,7 +91,7 @@ export class DeleteGroupScene {
   async stepWaitForSelection(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);
-    const sent = await ctx.reply('Please select a group from the buttons above.');
+    const sent = await ctx.reply(COMMON.SELECT_GROUP_FROM_BUTTONS);
     botCtx.session.messageIds.push(sent.message_id);
   }
 
@@ -103,7 +109,7 @@ export class DeleteGroupScene {
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
 
-    await ctx.reply('✅ Group deleted!', groupsMenuKeyboard());
+    await ctx.reply(GROUPS.DELETED, groupsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
@@ -111,7 +117,7 @@ export class DeleteGroupScene {
   async stepWaitForConfirm(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);
-    const sent = await ctx.reply('Please use the buttons above.');
+    const sent = await ctx.reply(COMMON.USE_BUTTONS_ABOVE);
     botCtx.session.messageIds.push(sent.message_id);
   }
 }

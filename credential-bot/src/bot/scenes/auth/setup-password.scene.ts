@@ -6,8 +6,12 @@ import { UsersService } from '../../../users/users.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
 import { mainKeyboard } from '../../keyboards/main.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { BotCommand } from '../../constants/commands.enum';
+import { AUTH } from '../../messages/auth.messages';
+import { COMMON } from '../../messages/common.messages';
 
-@Wizard('setup-password')
+@Wizard(SceneName.SETUP_PASSWORD)
 export class SetupPasswordScene {
   private readonly saltForHash: number;
   private readonly maxConfirmAttempts: number;
@@ -23,13 +27,13 @@ export class SetupPasswordScene {
     )!;
   }
 
-  @Command('cancel')
+  @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
-    await ctx.reply('Password setup cancelled ❌. Send /start to begin again.');
+    await ctx.reply(AUTH.SETUP_CANCELLED);
     await botCtx.scene.leave();
   }
 
@@ -39,7 +43,7 @@ export class SetupPasswordScene {
     botCtx.session.messageIds = [];
     botCtx.wizard.state.attempts = 0;
     const sent = await ctx.reply(
-      '🔐 Welcome! Please create a password for the bot:\n\nSend /cancel to abort.',
+      AUTH.SETUP_PROMPT,
     );
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
@@ -54,21 +58,21 @@ export class SetupPasswordScene {
     botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
-      const sent = await ctx.reply('Please enter a text password:');
+      const sent = await ctx.reply(COMMON.ENTER_TEXT_PASSWORD);
       botCtx.session.messageIds.push(sent.message_id);
       return;
     }
 
     if (text.length < 6) {
       const sent = await ctx.reply(
-        '⚠️ Password must be at least 6 characters. Try again:',
+        AUTH.PASSWORD_TOO_SHORT,
       );
       botCtx.session.messageIds.push(sent.message_id);
       return;
     }
 
     botCtx.wizard.state.password = text;
-    const sent = await ctx.reply('🔁 Confirm your password:');
+    const sent = await ctx.reply(AUTH.CONFIRM_PASSWORD);
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
@@ -79,7 +83,7 @@ export class SetupPasswordScene {
     botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
-      const sent = await ctx.reply('Please confirm the text password:');
+      const sent = await ctx.reply(COMMON.CONFIRM_TEXT_PASSWORD);
       botCtx.session.messageIds.push(sent.message_id);
       return;
     }
@@ -93,14 +97,16 @@ export class SetupPasswordScene {
           botCtx.session.messageIds,
         );
         botCtx.session.messageIds = [];
-        await ctx.reply('🚫 Too many failed attempts. Send /start to try again.');
+        await ctx.reply(
+          AUTH.SETUP_TOO_MANY_ATTEMPTS,
+        );
         await botCtx.scene.leave();
         return;
       }
 
       const remaining = this.maxConfirmAttempts - botCtx.wizard.state.attempts;
       const sent = await ctx.reply(
-        `❌ Passwords do not match. Try again (${remaining} attempts left):`,
+        AUTH.PASSWORDS_NOT_MATCH(remaining),
       );
       botCtx.session.messageIds.push(sent.message_id);
       botCtx.wizard.selectStep(2);
@@ -116,7 +122,7 @@ export class SetupPasswordScene {
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
 
-    await ctx.reply('✅ Password set successfully!', mainKeyboard());
+    await ctx.reply(AUTH.PASSWORD_SET, mainKeyboard());
     await botCtx.scene.leave();
   }
 }

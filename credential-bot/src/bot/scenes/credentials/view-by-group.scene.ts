@@ -5,8 +5,14 @@ import { GroupsService } from '../../../groups/groups.service';
 import { CredentialsService } from '../../../credentials/credentials.service';
 import { credentialsMenuKeyboard } from '../../keyboards/credentials.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { CallbackAction, ActionPrefix } from '../../constants/actions.enum';
+import { CREDENTIALS } from '../../messages/credentials.messages';
+import { GROUPS } from '../../messages/groups.messages';
+import { COMMON } from '../../messages/common.messages';
+import { KEYBOARDS } from '../../messages/keyboards.messages';
 
-@Wizard('view-by-group')
+@Wizard(SceneName.VIEW_BY_GROUP)
 export class ViewByGroupScene {
   constructor(
     private readonly usersService: UsersService,
@@ -24,27 +30,27 @@ export class ViewByGroupScene {
     const groups = await this.groupsService.findAllByUser(user!.id);
 
     if (!groups.length) {
-      await ctx.reply('ℹ️ You have no groups.', credentialsMenuKeyboard());
+      await ctx.reply(GROUPS.NO_GROUPS, credentialsMenuKeyboard());
       await botCtx.scene.leave();
       return;
     }
 
     const buttons = groups.map((g) =>
-      [Markup.button.callback(g.name, `vbg_${g.id}`)]
+      [Markup.button.callback(g.name, `${ActionPrefix.VBG}${g.id}`)]
     );
-    buttons.push([Markup.button.callback('Cancel ↩️', 'vbg_cancel')]);
+    buttons.push([Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.VBG_CANCEL)]);
 
-    const sent = await ctx.reply('📁 Select group:', Markup.inlineKeyboard(buttons));
+    const sent = await ctx.reply(CREDENTIALS.SELECT_GROUP, Markup.inlineKeyboard(buttons));
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 
-  @Action('vbg_cancel')
+  @Action(CallbackAction.VBG_CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
     await botCtx.deleteMessage();
-    await ctx.reply('Credentials menu 🔑:', credentialsMenuKeyboard());
+    await ctx.reply(CREDENTIALS.MENU, credentialsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
@@ -55,14 +61,14 @@ export class ViewByGroupScene {
     await botCtx.deleteMessage();
 
     const callbackData = (ctx as any).callbackQuery.data as string;
-    const groupId = callbackData.replace('vbg_', '');
+    const groupId = callbackData.replace(ActionPrefix.VBG, '');
 
     const telegramId = ctx.from!.id.toString();
     const user = await this.usersService.findByTelegramId(telegramId);
     const credentials = await this.credentialsService.findByGroup(user!.id, groupId);
 
     if (!credentials.length) {
-      await ctx.reply('ℹ️ No credentials in this group.', credentialsMenuKeyboard());
+      await ctx.reply(CREDENTIALS.NO_CREDENTIALS_IN_GROUP, credentialsMenuKeyboard());
       await botCtx.scene.leave();
       return;
     }
@@ -73,28 +79,28 @@ export class ViewByGroupScene {
     }).join('\n');
 
     await ctx.reply(
-      `🔑 Credentials in group:\n\n${list}`,
-      Markup.inlineKeyboard([[Markup.button.callback('Back ↩️', 'vbg_back')]]),
+      CREDENTIALS.LIST_BY_GROUP(list),
+      Markup.inlineKeyboard([[Markup.button.callback(KEYBOARDS.BACK, CallbackAction.VBG_BACK)]]),
     );
     botCtx.wizard.next();
   }
 
-  @Action('vbg_back')
+  @Action(CallbackAction.VBG_BACK)
   async onBack(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
     await botCtx.deleteMessage();
-    await ctx.reply('Credentials menu 🔑:', credentialsMenuKeyboard());
+    await ctx.reply(CREDENTIALS.MENU, credentialsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
   @WizardStep(2)
   async stepWaitForSelection(@Ctx() ctx: Context) {
-    await ctx.reply('Please select a group from the buttons above.');
+    await ctx.reply(COMMON.SELECT_GROUP_FROM_BUTTONS);
   }
 
   @WizardStep(3)
   async stepWaitForBack(@Ctx() ctx: Context) {
-    await ctx.reply('Please use the button above.');
+    await ctx.reply(COMMON.USE_BUTTON_ABOVE);
   }
 }

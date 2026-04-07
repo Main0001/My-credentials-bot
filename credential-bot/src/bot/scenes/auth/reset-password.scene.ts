@@ -3,8 +3,13 @@ import { Context, Markup } from 'telegraf';
 import { UsersService } from '../../../users/users.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { CallbackAction } from '../../constants/actions.enum';
+import { AUTH } from '../../messages/auth.messages';
+import { COMMON } from '../../messages/common.messages';
+import { KEYBOARDS } from '../../messages/keyboards.messages';
 
-@Wizard('reset-password')
+@Wizard(SceneName.RESET_PASSWORD)
 export class ResetPasswordScene {
   constructor(
     private readonly usersService: UsersService,
@@ -17,26 +22,26 @@ export class ResetPasswordScene {
     botCtx.session.messageIds = [];
 
     const sent = await ctx.reply(
-      '⚠️ This will delete your account and all data (groups, credentials). Are you sure?',
+      AUTH.RESET_CONFIRM_PROMPT,
       Markup.inlineKeyboard([
-        Markup.button.callback('Yes, delete everything 🗑️', 'reset_confirm'),
-        Markup.button.callback('Cancel ↩️', 'reset_cancel'),
+        Markup.button.callback(KEYBOARDS.YES_DELETE_EVERYTHING, CallbackAction.RESET_CONFIRM),
+        Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.RESET_CANCEL),
       ]),
     );
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 
-  @Action('reset_cancel')
+  @Action(CallbackAction.RESET_CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
     await botCtx.deleteMessage();
-    await ctx.reply('↩️ Reset cancelled.');
+    await ctx.reply(AUTH.RESET_CANCELLED);
     await botCtx.scene.leave();
   }
 
-  @Action('reset_confirm')
+  @Action(CallbackAction.RESET_CONFIRM)
   async onConfirm(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
@@ -52,11 +57,11 @@ export class ResetPasswordScene {
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
 
-    await botCtx.scene.enter('setup-password');
+    await botCtx.scene.enter(SceneName.SETUP_PASSWORD);
   }
 
   @WizardStep(2)
   async stepWait(@Ctx() ctx: Context) {
-    await ctx.reply('Please use the buttons above.');
+    await ctx.reply(COMMON.USE_BUTTONS_ABOVE);
   }
 }
