@@ -6,8 +6,14 @@ import { CredentialsService } from '../../../credentials/credentials.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
 import { credentialsMenuKeyboard } from '../../keyboards/credentials.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { BotCommand } from '../../constants/commands.enum';
+import { CallbackAction, ActionPrefix } from '../../constants/actions.enum';
+import { CREDENTIALS } from '../../messages/credentials.messages';
+import { COMMON } from '../../messages/common.messages';
+import { KEYBOARDS } from '../../messages/keyboards.messages';
 
-@Wizard('delete-credential')
+@Wizard(SceneName.DELETE_CREDENTIAL)
 export class DeleteCredentialScene {
   constructor(
     private readonly usersService: UsersService,
@@ -16,13 +22,13 @@ export class DeleteCredentialScene {
     private readonly messageCleaner: MessageCleaner,
   ) {}
 
-  @Command('cancel')
+  @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
-    await ctx.reply('↩️ Cancelled.', credentialsMenuKeyboard());
+    await ctx.reply(COMMON.CANCELLED, credentialsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
@@ -36,28 +42,28 @@ export class DeleteCredentialScene {
     const groups = await this.groupsService.findAllByUser(user!.id);
 
     const buttons = groups.map((g) =>
-      [Markup.button.callback(g.name, `del_cred_src_${g.id}`)]
+      [Markup.button.callback(g.name, `${ActionPrefix.DEL_CRED_SRC}${g.id}`)]
     );
-    buttons.push([Markup.button.callback('Without group 📄', 'del_cred_src_none')]);
-    buttons.push([Markup.button.callback('Cancel ↩️', 'del_cred_cancel')]);
+    buttons.push([Markup.button.callback(KEYBOARDS.WITHOUT_GROUP, CallbackAction.DEL_CRED_SRC_NONE)]);
+    buttons.push([Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.DEL_CRED_CANCEL)]);
 
-    const sent = await ctx.reply('📁 Select group or "Without group":', Markup.inlineKeyboard(buttons));
+    const sent = await ctx.reply(CREDENTIALS.SELECT_GROUP_OR_NONE, Markup.inlineKeyboard(buttons));
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 
-  @Action('del_cred_cancel')
+  @Action(CallbackAction.DEL_CRED_CANCEL)
   async onCancelAction(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
     await botCtx.deleteMessage();
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
-    await ctx.reply('↩️ Cancelled.', credentialsMenuKeyboard());
+    await ctx.reply(COMMON.CANCELLED, credentialsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
-  @Action('del_cred_src_none')
+  @Action(CallbackAction.DEL_CRED_SRC_NONE)
   async onSourceNone(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
@@ -76,7 +82,7 @@ export class DeleteCredentialScene {
     await botCtx.deleteMessage();
 
     const callbackData = (ctx as any).callbackQuery.data as string;
-    const groupId = callbackData.replace('del_cred_src_', '');
+    const groupId = callbackData.replace(ActionPrefix.DEL_CRED_SRC, '');
 
     const telegramId = ctx.from!.id.toString();
     const user = await this.usersService.findByTelegramId(telegramId);
@@ -86,18 +92,18 @@ export class DeleteCredentialScene {
 
   private async showCredentials(botCtx: BotContext, ctx: Context, credentials: any[]) {
     if (!credentials.length) {
-      await ctx.reply('ℹ️ No credentials found.', credentialsMenuKeyboard());
+      await ctx.reply(CREDENTIALS.NO_CREDENTIALS_FOUND, credentialsMenuKeyboard());
       await botCtx.scene.leave();
       return;
     }
 
     const buttons = credentials.map((c) => {
       const label = c.title ? `${c.title} (${c.login})` : c.login;
-      return [Markup.button.callback(label, `del_cred_${c.id}`)];
+      return [Markup.button.callback(label, `${ActionPrefix.DEL_CRED}${c.id}`)];
     });
-    buttons.push([Markup.button.callback('Cancel ↩️', 'del_cred_cancel')]);
+    buttons.push([Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.DEL_CRED_CANCEL)]);
 
-    const sent = await ctx.reply('🗑️ Select credential to delete:', Markup.inlineKeyboard(buttons));
+    const sent = await ctx.reply(CREDENTIALS.SELECT_TO_DELETE, Markup.inlineKeyboard(buttons));
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.selectStep(2);
   }
@@ -106,7 +112,7 @@ export class DeleteCredentialScene {
   async stepWaitForSource(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);
-    const sent = await ctx.reply('Please select from the buttons above.');
+    const sent = await ctx.reply(COMMON.SELECT_FROM_BUTTONS);
     botCtx.session.messageIds.push(sent.message_id);
   }
 
@@ -117,13 +123,13 @@ export class DeleteCredentialScene {
     await botCtx.deleteMessage();
 
     const callbackData = (ctx as any).callbackQuery.data as string;
-    botCtx.wizard.state.credentialId = callbackData.replace('del_cred_', '');
+    botCtx.wizard.state.credentialId = callbackData.replace(ActionPrefix.DEL_CRED, '');
 
     const sent = await ctx.reply(
-      '⚠️ Are you sure you want to delete this credential?',
+      CREDENTIALS.DELETE_CONFIRM,
       Markup.inlineKeyboard([
-        Markup.button.callback('Yes, delete 🗑️', 'del_cred_confirm'),
-        Markup.button.callback('No ↩️', 'del_cred_cancel'),
+        Markup.button.callback(KEYBOARDS.YES_DELETE, CallbackAction.DEL_CRED_CONFIRM),
+        Markup.button.callback(KEYBOARDS.NO, CallbackAction.DEL_CRED_CANCEL),
       ]),
     );
     botCtx.session.messageIds.push(sent.message_id);
@@ -134,11 +140,11 @@ export class DeleteCredentialScene {
   async stepWaitForCredential(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);
-    const sent = await ctx.reply('Please select a credential from the buttons above.');
+    const sent = await ctx.reply(COMMON.SELECT_CREDENTIAL_FROM_BUTTONS);
     botCtx.session.messageIds.push(sent.message_id);
   }
 
-  @Action('del_cred_confirm')
+  @Action(CallbackAction.DEL_CRED_CONFIRM)
   async onConfirm(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
@@ -152,7 +158,7 @@ export class DeleteCredentialScene {
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
 
-    await ctx.reply('✅ Credential deleted!', credentialsMenuKeyboard());
+    await ctx.reply(CREDENTIALS.DELETED, credentialsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
@@ -160,7 +166,7 @@ export class DeleteCredentialScene {
   async stepWaitForConfirm(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);
-    const sent = await ctx.reply('Please use the buttons above.');
+    const sent = await ctx.reply(COMMON.USE_BUTTONS_ABOVE);
     botCtx.session.messageIds.push(sent.message_id);
   }
 }

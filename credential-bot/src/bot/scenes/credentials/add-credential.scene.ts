@@ -6,8 +6,14 @@ import { CredentialsService } from '../../../credentials/credentials.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
 import { credentialsMenuKeyboard } from '../../keyboards/credentials.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { BotCommand } from '../../constants/commands.enum';
+import { CallbackAction, ActionPrefix } from '../../constants/actions.enum';
+import { CREDENTIALS } from '../../messages/credentials.messages';
+import { COMMON } from '../../messages/common.messages';
+import { KEYBOARDS } from '../../messages/keyboards.messages';
 
-@Wizard('add-credential')
+@Wizard(SceneName.ADD_CREDENTIAL)
 export class AddCredentialScene {
   constructor(
     private readonly usersService: UsersService,
@@ -16,13 +22,13 @@ export class AddCredentialScene {
     private readonly messageCleaner: MessageCleaner,
   ) {}
 
-  @Command('cancel')
+  @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
-    await ctx.reply('↩️ Cancelled.', credentialsMenuKeyboard());
+    await ctx.reply(COMMON.CANCELLED, credentialsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
@@ -31,18 +37,18 @@ export class AddCredentialScene {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds = [];
     const sent = await ctx.reply(
-      '📝 Enter credential title (or send /skip to skip):\n\nSend /cancel to abort.',
+      CREDENTIALS.ADD_TITLE_PROMPT,
     );
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 
-  @Command('skip')
+  @Command(BotCommand.SKIP)
   async onSkipTitle(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);
     botCtx.wizard.state.title = undefined;
-    const sent = await ctx.reply('🔤 Enter login:');
+    const sent = await ctx.reply(CREDENTIALS.ENTER_LOGIN);
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.selectStep(2);
   }
@@ -53,13 +59,13 @@ export class AddCredentialScene {
     botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
-      const sent = await ctx.reply('Please enter text or /skip:');
+      const sent = await ctx.reply(COMMON.ENTER_TEXT_OR_SKIP);
       botCtx.session.messageIds.push(sent.message_id);
       return;
     }
 
     botCtx.wizard.state.title = text;
-    const sent = await ctx.reply('🔤 Enter login:');
+    const sent = await ctx.reply(CREDENTIALS.ENTER_LOGIN);
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
@@ -70,13 +76,13 @@ export class AddCredentialScene {
     botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
-      const sent = await ctx.reply('Please enter a text login:');
+      const sent = await ctx.reply(COMMON.ENTER_TEXT_LOGIN);
       botCtx.session.messageIds.push(sent.message_id);
       return;
     }
 
     botCtx.wizard.state.login = text;
-    const sent = await ctx.reply('🔑 Enter password:');
+    const sent = await ctx.reply(CREDENTIALS.ENTER_PASSWORD);
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
@@ -87,7 +93,7 @@ export class AddCredentialScene {
     botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
-      const sent = await ctx.reply('Please enter a text password:');
+      const sent = await ctx.reply(COMMON.ENTER_TEXT_PASSWORD);
       botCtx.session.messageIds.push(sent.message_id);
       return;
     }
@@ -104,16 +110,16 @@ export class AddCredentialScene {
     }
 
     const buttons = groups.map((g) =>
-      [Markup.button.callback(g.name, `add_cred_group_${g.id}`)]
+      [Markup.button.callback(g.name, `${ActionPrefix.ADD_CRED_GROUP}${g.id}`)]
     );
-    buttons.push([Markup.button.callback('Without group 📄', 'add_cred_no_group')]);
+    buttons.push([Markup.button.callback(KEYBOARDS.WITHOUT_GROUP, CallbackAction.ADD_CRED_NO_GROUP)]);
 
-    const sent = await ctx.reply('📁 Select group:', Markup.inlineKeyboard(buttons));
+    const sent = await ctx.reply(CREDENTIALS.SELECT_GROUP, Markup.inlineKeyboard(buttons));
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 
-  @Action('add_cred_no_group')
+  @Action(CallbackAction.ADD_CRED_NO_GROUP)
   async onNoGroup(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
@@ -131,7 +137,7 @@ export class AddCredentialScene {
     await botCtx.deleteMessage();
 
     const callbackData = (ctx as any).callbackQuery.data as string;
-    const groupId = callbackData.replace('add_cred_group_', '');
+    const groupId = callbackData.replace(ActionPrefix.ADD_CRED_GROUP, '');
 
     const telegramId = ctx.from!.id.toString();
     const user = await this.usersService.findByTelegramId(telegramId);
@@ -142,7 +148,7 @@ export class AddCredentialScene {
   async stepWaitForGroup(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);
-    const sent = await ctx.reply('Please select a group from the buttons above.');
+    const sent = await ctx.reply(COMMON.SELECT_GROUP_FROM_BUTTONS);
     botCtx.session.messageIds.push(sent.message_id);
   }
 
@@ -162,7 +168,7 @@ export class AddCredentialScene {
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
 
-    await ctx.reply('✅ Credential added!', credentialsMenuKeyboard());
+    await ctx.reply(CREDENTIALS.ADDED, credentialsMenuKeyboard());
     await botCtx.scene.leave();
   }
 }

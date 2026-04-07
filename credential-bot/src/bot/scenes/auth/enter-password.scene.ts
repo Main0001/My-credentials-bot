@@ -6,8 +6,13 @@ import { UsersService } from '../../../users/users.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
 import { mainKeyboard } from '../../keyboards/main.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { CallbackAction } from '../../constants/actions.enum';
+import { AUTH } from '../../messages/auth.messages';
+import { COMMON } from '../../messages/common.messages';
+import { KEYBOARDS } from '../../messages/keyboards.messages';
 
-@Wizard('enter-password')
+@Wizard(SceneName.ENTER_PASSWORD)
 export class EnterPasswordScene {
   private readonly maxLoginAttempts: number;
 
@@ -25,21 +30,23 @@ export class EnterPasswordScene {
     botCtx.session.messageIds = [];
     botCtx.wizard.state.attempts = 0;
     const sent = await ctx.reply(
-      '🔐 Please enter your password:',
-      Markup.inlineKeyboard([[Markup.button.callback('Reset password 🔄', 'enter_pw_reset')]]),
+      AUTH.ENTER_PASSWORD,
+      Markup.inlineKeyboard([
+        [Markup.button.callback(KEYBOARDS.RESET_PASSWORD, CallbackAction.ENTER_PW_RESET)],
+      ]),
     );
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 
-  @Action('enter_pw_reset')
+  @Action(CallbackAction.ENTER_PW_RESET)
   async onReset(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
     await botCtx.deleteMessage();
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
-    await botCtx.scene.enter('reset-password');
+    await botCtx.scene.enter(SceneName.RESET_PASSWORD);
   }
 
   @WizardStep(2)
@@ -48,7 +55,7 @@ export class EnterPasswordScene {
     botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
-      const sent = await ctx.reply('Please enter a text password:');
+      const sent = await ctx.reply(COMMON.ENTER_TEXT_PASSWORD);
       botCtx.session.messageIds.push(sent.message_id);
       return;
     }
@@ -57,9 +64,12 @@ export class EnterPasswordScene {
     const user = await this.usersService.findByTelegramId(telegramId);
 
     if (!user) {
-      await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
+      await this.messageCleaner.deleteMessages(
+        botCtx,
+        botCtx.session.messageIds,
+      );
       botCtx.session.messageIds = [];
-      await botCtx.scene.enter('setup-password');
+      await botCtx.scene.enter(SceneName.SETUP_PASSWORD);
       return;
     }
 
@@ -67,25 +77,31 @@ export class EnterPasswordScene {
 
     if (isValid) {
       await this.usersService.updateLastActivity(user.id);
-      await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
+      await this.messageCleaner.deleteMessages(
+        botCtx,
+        botCtx.session.messageIds,
+      );
       botCtx.session.messageIds = [];
-      await ctx.reply('✅ Access granted!', mainKeyboard());
+      await ctx.reply(AUTH.ACCESS_GRANTED, mainKeyboard());
       await botCtx.scene.leave();
       return;
     }
 
-    botCtx.wizard.state.attempts!++;
+    botCtx.wizard.state.attempts = (botCtx.wizard.state.attempts ?? 0) + 1;
 
     if (botCtx.wizard.state.attempts! >= this.maxLoginAttempts) {
-      await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
+      await this.messageCleaner.deleteMessages(
+        botCtx,
+        botCtx.session.messageIds,
+      );
       botCtx.session.messageIds = [];
-      await ctx.reply('🚫 Too many failed attempts. Please try again later.');
+      await ctx.reply(AUTH.TOO_MANY_ATTEMPTS);
       await botCtx.scene.leave();
       return;
     }
 
     const remaining = this.maxLoginAttempts - botCtx.wizard.state.attempts!;
-    const sent = await ctx.reply(`❌ Wrong password. Attempts remaining: ${remaining}`);
+    const sent = await ctx.reply(AUTH.WRONG_PASSWORD(remaining));
     botCtx.session.messageIds.push(sent.message_id);
   }
 }

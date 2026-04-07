@@ -6,8 +6,12 @@ import { GroupsService } from '../../../groups/groups.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
 import { groupsMenuKeyboard } from '../../keyboards/groups.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
+import { SceneName } from '../../constants/scenes.enum';
+import { BotCommand } from '../../constants/commands.enum';
+import { GROUPS } from '../../messages/groups.messages';
+import { COMMON } from '../../messages/common.messages';
 
-@Wizard('create-group')
+@Wizard(SceneName.CREATE_GROUP)
 export class CreateGroupScene {
   private readonly maxLengthGroup: number;
 
@@ -20,13 +24,13 @@ export class CreateGroupScene {
     this.maxLengthGroup = configService.get<number>('groups.maxLengthGroup')!;
   }
 
-  @Command('cancel')
+  @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
-    await ctx.reply('↩️ Cancelled.', groupsMenuKeyboard());
+    await ctx.reply(COMMON.CANCELLED, groupsMenuKeyboard());
     await botCtx.scene.leave();
   }
 
@@ -34,7 +38,7 @@ export class CreateGroupScene {
   async stepEnterName(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds = [];
-    const sent = await ctx.reply('📝 Enter group name:\n\nSend /cancel to abort.');
+    const sent = await ctx.reply(GROUPS.CREATE_PROMPT);
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
@@ -45,14 +49,14 @@ export class CreateGroupScene {
     botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
-      const sent = await ctx.reply('Please enter a text name:');
+      const sent = await ctx.reply(COMMON.ENTER_TEXT_NAME);
       botCtx.session.messageIds.push(sent.message_id);
       return;
     }
 
     if (text.length > this.maxLengthGroup) {
       const sent = await ctx.reply(
-        `⚠️ Name is too long (max ${this.maxLengthGroup} characters). Try again:`,
+        GROUPS.NAME_TOO_LONG(this.maxLengthGroup),
       );
       botCtx.session.messageIds.push(sent.message_id);
       return;
@@ -65,7 +69,7 @@ export class CreateGroupScene {
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
 
-    await ctx.reply(`✅ Group "${text}" created!`, groupsMenuKeyboard());
+    await ctx.reply(GROUPS.CREATED(text), groupsMenuKeyboard());
     await botCtx.scene.leave();
   }
 }
