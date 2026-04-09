@@ -9,7 +9,7 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "build": "npx prisma generate && nest build",
+    "build": "npm install --production && npx prisma generate && nest build",
     "deploy:migrate": "npx prisma migrate deploy",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
