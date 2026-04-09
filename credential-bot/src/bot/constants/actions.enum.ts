@@ -20,6 +20,8 @@ export enum CallbackAction {
   ENTER_PW_RESET = 'enter_pw_reset',
   RESET_CONFIRM = 'reset_confirm',
   RESET_CANCEL = 'reset_cancel',
+  LOGOUT_CONFIRM = 'logout_confirm',
+  LOGOUT_CANCEL = 'logout_cancel',
 
   // Delete group scene
   DEL_GROUP_CONFIRM = 'del_group_confirm',

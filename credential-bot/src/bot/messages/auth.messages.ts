@@ -17,4 +17,8 @@ export const AUTH = {
 
   RESET_CONFIRM_PROMPT: '⚠️ This will delete your account and all data (groups, credentials). Are you sure?',
   RESET_CANCELLED: '↩️ Reset cancelled.',
+
+  LOGOUT_CONFIRM_PROMPT: '🚪 Are you sure you want to logout?',
+  LOGOUT_SUCCESS: '🚪 Logged out successfully. Enter your password to continue.',
+  LOGOUT_CANCELLED: '↩️ Logout cancelled.',
 };

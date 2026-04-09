@@ -29,6 +29,13 @@ export class UsersRepository {
     });
   }
 
+  clearLastActivity(userId: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { lastActivityAt: null },
+    });
+  }
+
   delete(userId: string) {
     return this.prisma.user.delete({ where: { id: userId } });
   }

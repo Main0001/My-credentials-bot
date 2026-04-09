@@ -21,6 +21,10 @@ export class UsersService {
     return this.usersRepository.updateLastActivity(userId);
   }
 
+  clearLastActivity(userId: string) {
+    return this.usersRepository.clearLastActivity(userId);
+  }
+
   delete(userId: string) {
     return this.usersRepository.delete(userId);
   }

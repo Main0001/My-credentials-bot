@@ -3,6 +3,7 @@ export const KEYBOARDS = {
   GROUPS: 'Groups 📁',
   CREDENTIALS: 'Credentials 🔑',
   RESET_PASSWORD: 'Reset password 🔄',
+  LOGOUT: 'Logout 🚪',
 
   // Groups menu
   CREATE_GROUP: 'Create group ➕',
@@ -24,6 +25,7 @@ export const KEYBOARDS = {
   CANCEL: 'Cancel ↩️',
   YES_DELETE: 'Yes, delete 🗑️',
   YES_DELETE_EVERYTHING: 'Yes, delete everything 🗑️',
+  YES_LOGOUT: 'Yes, logout 🚪',
   NO: 'No ↩️',
 
   // Edit credential fields

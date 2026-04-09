@@ -62,6 +62,14 @@ export class BotUpdate implements OnModuleInit {
     await ctx.scene.enter(SceneName.RESET_PASSWORD);
   }
 
+  @Hears(KEYBOARDS.LOGOUT)
+  async onLogout(@Ctx() ctx: BotContext) {
+    if (!(await this.authGuard.validate(ctx))) return;
+    if (!ctx.session.messageIds) ctx.session.messageIds = [];
+    ctx.session.messageIds.push(ctx.message!.message_id);
+    await ctx.scene.enter(SceneName.LOGOUT);
+  }
+
   @Action(CallbackAction.BACK_TO_MAIN)
   async onBackToMain(@Ctx() ctx: BotContext) {
     if (!(await this.authGuard.validate(ctx))) return;
