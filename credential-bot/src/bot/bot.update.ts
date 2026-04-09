@@ -1,4 +1,6 @@
-import { Update, Start, Ctx, Hears, Action } from 'nestjs-telegraf';
+import { Update, Start, Ctx, Hears, Action, InjectBot } from 'nestjs-telegraf';
+import { OnModuleInit } from '@nestjs/common';
+import { Telegraf } from 'telegraf';
 import type { BotContext } from './interfaces/bot-context.interface';
 import { AuthGuard } from './guards/auth.guard';
 import { mainKeyboard } from './keyboards/main.keyboard';
@@ -6,14 +8,25 @@ import { groupsMenuKeyboard } from './keyboards/groups.keyboard';
 import { credentialsMenuKeyboard } from './keyboards/credentials.keyboard';
 import { SceneName } from './constants/scenes.enum';
 import { CallbackAction } from './constants/actions.enum';
+import { BOT_COMMANDS } from './constants/bot-commands.config';
+import { BOT_DESCRIPTION, BOT_SHORT_DESCRIPTION } from './constants/bot-description.config';
 import { AUTH } from './messages/auth.messages';
 import { GROUPS } from './messages/groups.messages';
 import { CREDENTIALS } from './messages/credentials.messages';
 import { KEYBOARDS } from './messages/keyboards.messages';
 
 @Update()
-export class BotUpdate {
-  constructor(private readonly authGuard: AuthGuard) {}
+export class BotUpdate implements OnModuleInit {
+  constructor(
+    @InjectBot() private readonly bot: Telegraf<BotContext>,
+    private readonly authGuard: AuthGuard,
+  ) {}
+
+  async onModuleInit() {
+    await this.bot.telegram.setMyCommands(BOT_COMMANDS);
+    await this.bot.telegram.setMyDescription(BOT_DESCRIPTION);
+    await this.bot.telegram.setMyShortDescription(BOT_SHORT_DESCRIPTION);
+  }
 
   @Start()
   async onStart(@Ctx() ctx: BotContext) {
