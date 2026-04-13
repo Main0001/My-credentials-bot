@@ -51,9 +51,11 @@ export class EditGroupScene {
       return;
     }
 
-    const buttons = groups.map((g) =>
-      [Markup.button.callback(g.name, `${ActionPrefix.EDIT_GROUP}${g.id}`)]
-    );
+    const buttons = groups
+      .sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0))
+      .map((g) =>
+        [Markup.button.callback(g.name, `${ActionPrefix.EDIT_GROUP}${g.id}`)]
+      );
     buttons.push([Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.EDIT_GROUP_CANCEL)]);
 
     const sent = await ctx.reply(GROUPS.SELECT_TO_EDIT, Markup.inlineKeyboard(buttons));

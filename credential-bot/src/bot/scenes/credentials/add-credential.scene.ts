@@ -109,9 +109,11 @@ export class AddCredentialScene {
       return;
     }
 
-    const buttons = groups.map((g) =>
-      [Markup.button.callback(g.name, `${ActionPrefix.ADD_CRED_GROUP}${g.id}`)]
-    );
+    const buttons = groups
+      .sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0))
+      .map((g) =>
+        [Markup.button.callback(g.name, `${ActionPrefix.ADD_CRED_GROUP}${g.id}`)]
+      );
     buttons.push([Markup.button.callback(KEYBOARDS.WITHOUT_GROUP, CallbackAction.ADD_CRED_NO_GROUP)]);
 
     const sent = await ctx.reply(CREDENTIALS.SELECT_GROUP, Markup.inlineKeyboard(buttons));

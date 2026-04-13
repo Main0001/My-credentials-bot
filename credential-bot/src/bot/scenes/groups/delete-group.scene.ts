@@ -45,9 +45,11 @@ export class DeleteGroupScene {
       return;
     }
 
-    const buttons = groups.map((g) =>
-      [Markup.button.callback(g.name, `${ActionPrefix.DEL_GROUP}${g.id}`)]
-    );
+    const buttons = groups
+      .sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0))
+      .map((g) =>
+        [Markup.button.callback(g.name, `${ActionPrefix.DEL_GROUP}${g.id}`)]
+      );
     buttons.push([Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.DEL_GROUP_CANCEL)]);
 
     const sent = await ctx.reply(GROUPS.SELECT_TO_DELETE, Markup.inlineKeyboard(buttons));

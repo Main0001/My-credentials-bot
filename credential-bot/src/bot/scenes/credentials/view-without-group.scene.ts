@@ -32,9 +32,15 @@ export class ViewWithoutGroupScene {
       return;
     }
 
-    const list = credentials.map((c, i) =>
-      `${i + 1}. ${formatCredentialLine(c.title, c.login, c.password)}`,
-    ).join('\n');
+    const list = credentials
+      .sort((a, b) => {
+        const labelA = a.title ?? a.login;
+        const labelB = b.title ?? b.login;
+        return labelA > labelB ? 1 : labelA < labelB ? -1 : 0;
+      })
+      .map((c, i) =>
+        `${i + 1}. ${formatCredentialLine(c.title, c.login, c.password)}`,
+      ).join('\n');
 
     const sent = await ctx.reply(
       CREDENTIALS.LIST_WITHOUT_GROUP(list),

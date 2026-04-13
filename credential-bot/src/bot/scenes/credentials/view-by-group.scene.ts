@@ -35,9 +35,11 @@ export class ViewByGroupScene {
       return;
     }
 
-    const buttons = groups.map((g) =>
-      [Markup.button.callback(g.name, `${ActionPrefix.VBG}${g.id}`)]
-    );
+    const buttons = groups
+      .sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0))
+      .map((g) =>
+        [Markup.button.callback(g.name, `${ActionPrefix.VBG}${g.id}`)]
+      );
     buttons.push([Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.VBG_CANCEL)]);
 
     const sent = await ctx.reply(CREDENTIALS.SELECT_GROUP, Markup.inlineKeyboard(buttons));
@@ -73,9 +75,15 @@ export class ViewByGroupScene {
       return;
     }
 
-    const list = credentials.map((c, i) =>
-      `${i + 1}. ${formatCredentialLine(c.title, c.login, c.password)}`,
-    ).join('\n');
+    const list = credentials
+      .sort((a, b) => {
+        const labelA = a.title ?? a.login;
+        const labelB = b.title ?? b.login;
+        return labelA > labelB ? 1 : labelA < labelB ? -1 : 0;
+      })
+      .map((c, i) =>
+        `${i + 1}. ${formatCredentialLine(c.title, c.login, c.password)}`,
+      ).join('\n');
 
     await ctx.reply(
       CREDENTIALS.LIST_BY_GROUP(list),

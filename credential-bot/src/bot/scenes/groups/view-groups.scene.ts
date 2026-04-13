@@ -32,7 +32,9 @@ export class ViewGroupsScene {
       return;
     }
 
-    const list = groups.map((g, i) => `${i + 1}. ${g.name}`).join('\n');
+    const list = groups
+      .sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0))
+      .map((g, i) => `${i + 1}. ${g.name}`).join('\n');
     const sent = await ctx.reply(
       GROUPS.LIST(list),
       Markup.inlineKeyboard([[Markup.button.callback(KEYBOARDS.BACK, CallbackAction.VIEW_GROUPS_BACK)]]),
