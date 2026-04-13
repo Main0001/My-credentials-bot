@@ -15,10 +15,10 @@ export const AUTH = {
   SETUP_TOO_MANY_ATTEMPTS: '🚫 Too many failed attempts. Send /start to try again.',
   PASSWORD_SET: '✅ Password set successfully!',
 
-  RESET_CONFIRM_PROMPT: '⚠️ This will delete your account and all data (groups, credentials). Are you sure?',
+  RESET_CONFIRM_PROMPT: '⚠️ This will delete your account and all data (groups, credentials). Are you sure?\n\nSend /cancel to abort.',
   RESET_CANCELLED: '↩️ Reset cancelled.',
 
-  LOGOUT_CONFIRM_PROMPT: '🚪 Are you sure you want to logout?',
+  LOGOUT_CONFIRM_PROMPT: '🚪 Are you sure you want to logout?\n\nSend /cancel to abort.',
   LOGOUT_SUCCESS: '🚪 Logged out successfully. Enter your password to continue.',
   LOGOUT_CANCELLED: '↩️ Logout cancelled.',
 };
