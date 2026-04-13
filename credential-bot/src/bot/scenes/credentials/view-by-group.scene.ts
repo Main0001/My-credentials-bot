@@ -7,7 +7,7 @@ import { credentialsMenuKeyboard } from '../../keyboards/credentials.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
 import { SceneName } from '../../constants/scenes.enum';
 import { CallbackAction, ActionPrefix } from '../../constants/actions.enum';
-import { CREDENTIALS } from '../../messages/credentials.messages';
+import { CREDENTIALS, formatCredentialLine } from '../../messages/credentials.messages';
 import { GROUPS } from '../../messages/groups.messages';
 import { COMMON } from '../../messages/common.messages';
 import { KEYBOARDS } from '../../messages/keyboards.messages';
@@ -73,14 +73,16 @@ export class ViewByGroupScene {
       return;
     }
 
-    const list = credentials.map((c, i) => {
-      const title = c.title ? `${c.title} — ` : '';
-      return `${i + 1}. ${title}${c.login} : ${c.password}`;
-    }).join('\n');
+    const list = credentials.map((c, i) =>
+      `${i + 1}. ${formatCredentialLine(c.title, c.login, c.password)}`,
+    ).join('\n');
 
     await ctx.reply(
       CREDENTIALS.LIST_BY_GROUP(list),
-      Markup.inlineKeyboard([[Markup.button.callback(KEYBOARDS.BACK, CallbackAction.VBG_BACK)]]),
+      {
+        parse_mode: 'HTML',
+        ...Markup.inlineKeyboard([[Markup.button.callback(KEYBOARDS.BACK, CallbackAction.VBG_BACK)]]),
+      },
     );
     botCtx.wizard.next();
   }

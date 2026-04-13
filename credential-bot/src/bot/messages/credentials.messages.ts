@@ -1,3 +1,12 @@
+export const formatCredentialLine = (
+  title: string | null,
+  login: string,
+  password: string,
+): string => {
+  const titlePart = title ? `${title} — ` : '';
+  return `${titlePart}<code>${login}</code> : <tg-spoiler>${password}</tg-spoiler>`;
+};
+
 export const CREDENTIALS = {
   MENU: 'Credentials menu 🔑:',
   NO_CREDENTIALS: 'ℹ️ You have no credentials.',
@@ -13,11 +22,11 @@ export const CREDENTIALS = {
   ADDED: '✅ Credential added!',
 
   SELECT_TO_EDIT: '✏️ Select credential to edit:',
-  WHAT_TO_EDIT: '✏️ What do you want to edit?',
+  CURRENT_CREDENTIAL: (line: string) => `📋 Current data:\n${line}\n\n✏️ What do you want to edit?`,
   ENTER_NEW_FIELD: (field: string) => `📝 Enter new ${field}:`,
   ENTER_TEXT_FIELD: (field: string) => `Please enter a text ${field}:`,
-  FIELD_UPDATED: (field: string) =>
-    `✅ ${field} updated!\n\n✏️ What do you want to edit?`,
+  FIELD_UPDATED: (field: string, line: string) =>
+    `✅ ${field} updated!\n\n📋 Current data:\n${line}\n\n✏️ What do you want to edit?`,
 
   SELECT_TO_DELETE: '🗑️ Select credential to delete:',
   DELETE_CONFIRM: '⚠️ Are you sure you want to delete this credential?',

@@ -9,7 +9,7 @@ import type { BotContext } from '../../interfaces/bot-context.interface';
 import { SceneName } from '../../constants/scenes.enum';
 import { BotCommand } from '../../constants/commands.enum';
 import { CallbackAction, ActionPrefix } from '../../constants/actions.enum';
-import { CREDENTIALS } from '../../messages/credentials.messages';
+import { CREDENTIALS, formatCredentialLine } from '../../messages/credentials.messages';
 import { COMMON } from '../../messages/common.messages';
 import { KEYBOARDS } from '../../messages/keyboards.messages';
 
@@ -134,9 +134,18 @@ export class EditCredentialScene {
     await botCtx.deleteMessage();
 
     const callbackData = (ctx as any).callbackQuery.data as string;
-    botCtx.wizard.state.credentialId = callbackData.replace(ActionPrefix.EDIT_CRED, '');
+    const credentialId = callbackData.replace(ActionPrefix.EDIT_CRED, '');
+    botCtx.wizard.state.credentialId = credentialId;
 
-    const sent = await ctx.reply(CREDENTIALS.WHAT_TO_EDIT, FIELD_KEYBOARD);
+    const telegramId = ctx.from!.id.toString();
+    const user = await this.usersService.findByTelegramId(telegramId);
+    const credential = await this.credentialsService.findOne(credentialId, user!.id);
+
+    const line = formatCredentialLine(credential!.title, credential!.login, credential!.password);
+    const sent = await ctx.reply(CREDENTIALS.CURRENT_CREDENTIAL(line), {
+      parse_mode: 'HTML',
+      ...FIELD_KEYBOARD,
+    });
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.selectStep(4);
   }
@@ -201,7 +210,12 @@ export class EditCredentialScene {
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
 
-    const sent = await ctx.reply(CREDENTIALS.FIELD_UPDATED(this.editField), FIELD_KEYBOARD);
+    const updated = await this.credentialsService.findOne(credentialId, user!.id);
+    const line = formatCredentialLine(updated!.title, updated!.login, updated!.password);
+    const sent = await ctx.reply(CREDENTIALS.FIELD_UPDATED(this.editField, line), {
+      parse_mode: 'HTML',
+      ...FIELD_KEYBOARD,
+    });
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.selectStep(4);
   }
