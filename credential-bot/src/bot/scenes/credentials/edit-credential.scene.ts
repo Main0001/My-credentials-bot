@@ -52,9 +52,11 @@ export class EditCredentialScene {
     const user = await this.usersService.findByTelegramId(telegramId);
     const groups = await this.groupsService.findAllByUser(user!.id);
 
-    const buttons = groups.map((g) =>
-      [Markup.button.callback(g.name, `${ActionPrefix.EDIT_CRED_SRC}${g.id}`)]
-    );
+    const buttons = groups
+      .sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0))
+      .map((g) =>
+        [Markup.button.callback(g.name, `${ActionPrefix.EDIT_CRED_SRC}${g.id}`)]
+      );
     buttons.push([Markup.button.callback(KEYBOARDS.WITHOUT_GROUP, CallbackAction.EDIT_CRED_SRC_NONE)]);
     buttons.push([Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.EDIT_CRED_CANCEL)]);
 
@@ -108,10 +110,16 @@ export class EditCredentialScene {
       return;
     }
 
-    const buttons = credentials.map((c) => {
-      const label = c.title ? `${c.title} (${c.login})` : c.login;
-      return [Markup.button.callback(label, `${ActionPrefix.EDIT_CRED}${c.id}`)];
-    });
+    const buttons = credentials
+      .sort((a, b) => {
+        const labelA = a.title ?? a.login;
+        const labelB = b.title ?? b.login;
+        return labelA > labelB ? 1 : labelA < labelB ? -1 : 0;
+      })
+      .map((c) => {
+        const label = c.title ? `${c.title} (${c.login})` : c.login;
+        return [Markup.button.callback(label, `${ActionPrefix.EDIT_CRED}${c.id}`)];
+      });
     buttons.push([Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.EDIT_CRED_CANCEL)]);
 
     const sent = await ctx.reply(CREDENTIALS.SELECT_TO_EDIT, Markup.inlineKeyboard(buttons));
