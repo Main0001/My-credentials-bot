@@ -13,6 +13,5 @@ export const credentialsMenuKeyboard = () =>
       Markup.button.callback(KEYBOARDS.VIEW_ALL, CallbackAction.CREDENTIAL_VIEW_ALL),
       Markup.button.callback(KEYBOARDS.VIEW_BY_GROUP, CallbackAction.CREDENTIAL_VIEW_BY_GROUP),
     ],
-    [Markup.button.callback(KEYBOARDS.VIEW_WITHOUT_GROUP, CallbackAction.CREDENTIAL_VIEW_NO_GROUP)],
     [Markup.button.callback(KEYBOARDS.BACK, CallbackAction.BACK_TO_MAIN)],
   ]);
