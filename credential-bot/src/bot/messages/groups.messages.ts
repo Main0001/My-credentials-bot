@@ -7,12 +7,12 @@ export const GROUPS = {
     `⚠️ Name is too long (max ${max} characters). Try again:`,
   CREATED: (name: string) => `✅ Group "${name}" created!`,
 
-  SELECT_TO_EDIT: '✏️ Select group to edit:',
-  ENTER_NEW_NAME: '📝 Enter new group name:',
+  SELECT_TO_EDIT: '✏️ Select group to edit:\n\nSend /cancel to abort.',
+  ENTER_NEW_NAME: '📝 Enter new group name:\n\nSend /cancel to abort.',
   RENAMED: (name: string) => `✅ Group renamed to "${name}"!`,
 
-  SELECT_TO_DELETE: '🗑️ Select group to delete:',
-  DELETE_CONFIRM: '⚠️ Are you sure? Credentials in this group will be ungrouped.',
+  SELECT_TO_DELETE: '🗑️ Select group to delete:\n\nSend /cancel to abort.',
+  DELETE_CONFIRM: '⚠️ Are you sure? Credentials in this group will be ungrouped.\n\nSend /cancel to abort.',
   DELETED: '✅ Group deleted!',
 
   LIST: (list: string) => `📁 Your groups:\n\n${list}`,
