@@ -6,7 +6,7 @@ import { credentialsMenuKeyboard } from '../../keyboards/credentials.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
 import { SceneName } from '../../constants/scenes.enum';
 import { CallbackAction } from '../../constants/actions.enum';
-import { CREDENTIALS } from '../../messages/credentials.messages';
+import { CREDENTIALS, formatCredentialLine } from '../../messages/credentials.messages';
 import { COMMON } from '../../messages/common.messages';
 import { KEYBOARDS } from '../../messages/keyboards.messages';
 
@@ -32,14 +32,16 @@ export class ViewAllCredentialsScene {
       return;
     }
 
-    const list = credentials.map((c, i) => {
-      const title = c.title ? `${c.title} — ` : '';
-      return `${i + 1}. ${title}${c.login} : ${c.password}`;
-    }).join('\n');
+    const list = credentials.map((c, i) =>
+      `${i + 1}. ${formatCredentialLine(c.title, c.login, c.password)}`,
+    ).join('\n');
 
     const sent = await ctx.reply(
       CREDENTIALS.LIST_ALL(list),
-      Markup.inlineKeyboard([[Markup.button.callback(KEYBOARDS.BACK, CallbackAction.VIEW_ALL_CRED_BACK)]]),
+      {
+        parse_mode: 'HTML',
+        ...Markup.inlineKeyboard([[Markup.button.callback(KEYBOARDS.BACK, CallbackAction.VIEW_ALL_CRED_BACK)]]),
+      },
     );
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
