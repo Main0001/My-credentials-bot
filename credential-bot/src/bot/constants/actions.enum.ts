@@ -50,6 +50,7 @@ export enum CallbackAction {
 
   // View credentials scenes
   VIEW_ALL_CRED_BACK = 'view_all_cred_back',
+  VBG_NO_GROUP = 'vbg_no_group',
   VBG_CANCEL = 'vbg_cancel',
   VBG_BACK = 'vbg_back',
   VWG_BACK = 'vwg_back',
