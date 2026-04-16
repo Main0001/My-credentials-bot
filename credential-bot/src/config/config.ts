@@ -23,6 +23,10 @@ export const configuration = () => ({
       .get('MAX_CONFIRM_ATTEMPTS')
       .required()
       .asIntPositive(),
+    lockoutDurationMinutes: env
+      .get('LOCKOUT_DURATION_MINUTES')
+      .required()
+      .asIntPositive(),
   },
   groups: {
     maxLengthGroup: env.get('MAX_LENGTH_GROUP').required().asIntPositive(),

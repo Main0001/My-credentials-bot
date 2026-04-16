@@ -9,14 +9,16 @@ datasource db {
 }
 
 model User {
-  id             String   @id @default(uuid())
-  telegramId     String   @unique
-  passwordHash   String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  lastActivityAt DateTime?
-  groups         Group[]
-  credentials    Credential[]
+  id                   String   @id @default(uuid())
+  telegramId           String   @unique
+  passwordHash         String
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  lastActivityAt       DateTime?
+  failedLoginAttempts  Int      @default(0)
+  lockedUntil          DateTime?
+  groups               Group[]
+  credentials          Credential[]
 }
 
 model Group {

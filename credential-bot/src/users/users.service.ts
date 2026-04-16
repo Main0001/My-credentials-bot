@@ -28,4 +28,16 @@ export class UsersService {
   delete(userId: string) {
     return this.usersRepository.delete(userId);
   }
+
+  incrementFailedAttempts(userId: string) {
+    return this.usersRepository.incrementFailedAttempts(userId);
+  }
+
+  resetFailedAttempts(userId: string) {
+    return this.usersRepository.resetFailedAttempts(userId);
+  }
+
+  setLockout(userId: string, lockedUntil: Date) {
+    return this.usersRepository.setLockout(userId, lockedUntil);
+  }
 }

@@ -3,6 +3,8 @@ export const AUTH = {
   ENTER_PASSWORD: '🔐 Please enter your password:',
   ACCESS_GRANTED: '✅ Access granted!',
   TOO_MANY_ATTEMPTS: '🚫 Too many failed attempts. Please try again later.',
+  LOCKED_OUT: (minutes: number) =>
+    `🚫 Too many failed attempts. Try again in ${minutes} minute(s).`,
   WRONG_PASSWORD: (remaining: number) =>
     `❌ Wrong password. Attempts remaining: ${remaining}`,
 
