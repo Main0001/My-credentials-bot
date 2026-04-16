@@ -2,6 +2,7 @@ import { Ctx, Wizard, WizardStep, Message, Action } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import dayjs from 'dayjs';
 import { UsersService } from '../../../users/users.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
 import { mainKeyboard } from '../../keyboards/main.keyboard';
@@ -15,6 +16,7 @@ import { KEYBOARDS } from '../../messages/keyboards.messages';
 @Wizard(SceneName.ENTER_PASSWORD)
 export class EnterPasswordScene {
   private readonly maxLoginAttempts: number;
+  private readonly lockoutDurationMinutes: number;
 
   constructor(
     private readonly usersService: UsersService,
@@ -22,17 +24,35 @@ export class EnterPasswordScene {
     configService: ConfigService,
   ) {
     this.maxLoginAttempts = configService.get<number>('auth.maxLoginAttempts')!;
+    this.lockoutDurationMinutes = configService.get<number>(
+      'auth.lockoutDurationMinutes',
+    )!;
   }
 
   @WizardStep(1)
   async stepAskPassword(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds = [];
-    botCtx.wizard.state.attempts = 0;
+
+    const telegramId = ctx.from!.id.toString();
+    const user = await this.usersService.findByTelegramId(telegramId);
+
+    if (user?.lockedUntil && dayjs(user.lockedUntil).isAfter(dayjs())) {
+      const minutesLeft = dayjs(user.lockedUntil).diff(dayjs(), 'minute') + 1;
+      await ctx.reply(AUTH.LOCKED_OUT(minutesLeft));
+      await botCtx.scene.leave();
+      return;
+    }
+
     const sent = await ctx.reply(
       AUTH.ENTER_PASSWORD,
       Markup.inlineKeyboard([
-        [Markup.button.callback(KEYBOARDS.RESET_PASSWORD, CallbackAction.ENTER_PW_RESET)],
+        [
+          Markup.button.callback(
+            KEYBOARDS.RESET_PASSWORD,
+            CallbackAction.ENTER_PW_RESET,
+          ),
+        ],
       ]),
     );
     botCtx.session.messageIds.push(sent.message_id);
@@ -76,6 +96,7 @@ export class EnterPasswordScene {
     const isValid = await bcrypt.compare(text, user.passwordHash);
 
     if (isValid) {
+      await this.usersService.resetFailedAttempts(user.id);
       await this.usersService.updateLastActivity(user.id);
       await this.messageCleaner.deleteMessages(
         botCtx,
@@ -87,20 +108,24 @@ export class EnterPasswordScene {
       return;
     }
 
-    botCtx.wizard.state.attempts = (botCtx.wizard.state.attempts ?? 0) + 1;
+    const updated = await this.usersService.incrementFailedAttempts(user.id);
 
-    if (botCtx.wizard.state.attempts! >= this.maxLoginAttempts) {
+    if (updated.failedLoginAttempts >= this.maxLoginAttempts) {
+      const lockedUntil = dayjs()
+        .add(this.lockoutDurationMinutes, 'minute')
+        .toDate();
+      await this.usersService.setLockout(user.id, lockedUntil);
       await this.messageCleaner.deleteMessages(
         botCtx,
         botCtx.session.messageIds,
       );
       botCtx.session.messageIds = [];
-      await ctx.reply(AUTH.TOO_MANY_ATTEMPTS);
+      await ctx.reply(AUTH.LOCKED_OUT(this.lockoutDurationMinutes));
       await botCtx.scene.leave();
       return;
     }
 
-    const remaining = this.maxLoginAttempts - botCtx.wizard.state.attempts!;
+    const remaining = this.maxLoginAttempts - updated.failedLoginAttempts;
     const sent = await ctx.reply(AUTH.WRONG_PASSWORD(remaining));
     botCtx.session.messageIds.push(sent.message_id);
   }

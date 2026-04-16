@@ -39,4 +39,25 @@ export class UsersRepository {
   delete(userId: string) {
     return this.prisma.user.delete({ where: { id: userId } });
   }
+
+  incrementFailedAttempts(userId: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { failedLoginAttempts: { increment: 1 } },
+    });
+  }
+
+  resetFailedAttempts(userId: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { failedLoginAttempts: 0, lockedUntil: null },
+    });
+  }
+
+  setLockout(userId: string, lockedUntil: Date) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { failedLoginAttempts: 0, lockedUntil },
+    });
+  }
 }
