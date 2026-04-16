@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Context } from 'telegraf';
+import type { BotContext } from '../interfaces/bot-context.interface';
 
 @Injectable()
 export class MessageCleaner {
@@ -17,5 +18,11 @@ export class MessageCleaner {
     await Promise.allSettled(
       messageIds.map((id) => this.deleteMessage(ctx, id)),
     );
+  }
+
+  async deleteMenuMessage(ctx: BotContext): Promise<void> {
+    if (!ctx.session?.menuMessageId) return;
+    await this.deleteMessage(ctx, ctx.session.menuMessageId);
+    ctx.session.menuMessageId = undefined;
   }
 }

@@ -1,6 +1,10 @@
 export enum CallbackAction {
   // Main menu
   BACK_TO_MAIN = 'back_to_main',
+  MAIN_GROUPS = 'main_groups',
+  MAIN_CREDENTIALS = 'main_credentials',
+  MAIN_RESET_PASSWORD = 'main_reset_password',
+  MAIN_LOGOUT = 'main_logout',
 
   // Groups menu
   GROUP_CREATE = 'group_create',
