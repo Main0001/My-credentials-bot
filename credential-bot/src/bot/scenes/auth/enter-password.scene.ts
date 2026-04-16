@@ -1,4 +1,4 @@
-import { Ctx, Wizard, WizardStep, Message, Action } from 'nestjs-telegraf';
+import { Ctx, Wizard, WizardStep, Message, Action, Command } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -8,6 +8,7 @@ import { MessageCleaner } from '../../helpers/message-cleaner';
 import { mainKeyboard } from '../../keyboards/main.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
 import { SceneName } from '../../constants/scenes.enum';
+import { BotCommand } from '../../constants/commands.enum';
 import { CallbackAction } from '../../constants/actions.enum';
 import { AUTH } from '../../messages/auth.messages';
 import { COMMON } from '../../messages/common.messages';
@@ -27,6 +28,36 @@ export class EnterPasswordScene {
     this.lockoutDurationMinutes = configService.get<number>(
       'auth.lockoutDurationMinutes',
     )!;
+  }
+
+  @Command(BotCommand.MENU)
+  async onMenuAttempt(@Ctx() ctx: Context) {
+    await ctx.reply(
+      AUTH.ENTER_PASSWORD,
+      Markup.inlineKeyboard([
+        [
+          Markup.button.callback(
+            KEYBOARDS.RESET_PASSWORD,
+            CallbackAction.ENTER_PW_RESET,
+          ),
+        ],
+      ]),
+    );
+  }
+
+  @Command(BotCommand.CANCEL)
+  async onCancelAttempt(@Ctx() ctx: Context) {
+    await ctx.reply(
+      AUTH.ENTER_PASSWORD,
+      Markup.inlineKeyboard([
+        [
+          Markup.button.callback(
+            KEYBOARDS.RESET_PASSWORD,
+            CallbackAction.ENTER_PW_RESET,
+          ),
+        ],
+      ]),
+    );
   }
 
   @WizardStep(1)

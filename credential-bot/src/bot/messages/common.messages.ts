@@ -1,5 +1,6 @@
 export const COMMON = {
   CANCELLED: '↩️ Cancelled.',
+  USE_CANCEL_FIRST: '⚠️ Please finish or /cancel the current operation first.',
   ENTER_TEXT_PASSWORD: 'Please enter a text password:\n\nSend /cancel to abort.',
   ENTER_TEXT_NAME: 'Please enter a text name:\n\nSend /cancel to abort.',
   ENTER_TEXT_OR_SKIP: 'Please enter text or /skip:',

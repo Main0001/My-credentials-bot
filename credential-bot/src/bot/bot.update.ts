@@ -1,18 +1,21 @@
-import { Update, Start, Ctx, Hears, Action, InjectBot } from 'nestjs-telegraf';
+import { Update, Start, Ctx, Action, Command, InjectBot } from 'nestjs-telegraf';
 import { OnModuleInit } from '@nestjs/common';
 import { Telegraf } from 'telegraf';
 import type { BotContext } from './interfaces/bot-context.interface';
 import { AuthGuard } from './guards/auth.guard';
+import { MessageCleaner } from './helpers/message-cleaner';
 import { mainKeyboard } from './keyboards/main.keyboard';
 import { groupsMenuKeyboard } from './keyboards/groups.keyboard';
 import { credentialsMenuKeyboard } from './keyboards/credentials.keyboard';
 import { SceneName } from './constants/scenes.enum';
+import { BotCommand } from './constants/commands.enum';
 import { CallbackAction } from './constants/actions.enum';
 import { BOT_COMMANDS } from './constants/bot-commands.config';
 import { BOT_DESCRIPTION, BOT_SHORT_DESCRIPTION } from './constants/bot-description.config';
 import { AUTH } from './messages/auth.messages';
 import { GROUPS } from './messages/groups.messages';
 import { CREDENTIALS } from './messages/credentials.messages';
+import { COMMON } from './messages/common.messages';
 import { KEYBOARDS } from './messages/keyboards.messages';
 
 @Update()
@@ -20,6 +23,7 @@ export class BotUpdate implements OnModuleInit {
   constructor(
     @InjectBot() private readonly bot: Telegraf<BotContext>,
     private readonly authGuard: AuthGuard,
+    private readonly messageCleaner: MessageCleaner,
   ) {}
 
   async onModuleInit() {
@@ -36,37 +40,56 @@ export class BotUpdate implements OnModuleInit {
     );
   }
 
-  @Hears(KEYBOARDS.GROUPS)
+  @Command(BotCommand.MENU)
+  async onMenu(@Ctx() ctx: BotContext) {
+    if (ctx.scene.current) {
+      await ctx.reply(COMMON.USE_CANCEL_FIRST);
+      return;
+    }
+
+    await this.messageCleaner.deleteMenuMessage(ctx);
+
+    if (!(await this.authGuard.validate(ctx))) return;
+
+    const sent = await ctx.reply(KEYBOARDS.CHOOSE_OPTION, mainKeyboard());
+    ctx.session.menuMessageId = sent.message_id;
+  }
+
+  @Action(CallbackAction.MAIN_GROUPS)
   async onGroups(@Ctx() ctx: BotContext) {
     if (!(await this.authGuard.validate(ctx))) return;
+    await ctx.answerCbQuery();
+    await ctx.deleteMessage();
     if (!ctx.session.messageIds) ctx.session.messageIds = [];
-    ctx.session.messageIds.push(ctx.message!.message_id);
     const sent = await ctx.reply(GROUPS.MENU, groupsMenuKeyboard());
     ctx.session.messageIds.push(sent.message_id);
   }
 
-  @Hears(KEYBOARDS.CREDENTIALS)
+  @Action(CallbackAction.MAIN_CREDENTIALS)
   async onCredentials(@Ctx() ctx: BotContext) {
     if (!(await this.authGuard.validate(ctx))) return;
+    await ctx.answerCbQuery();
+    await ctx.deleteMessage();
     if (!ctx.session.messageIds) ctx.session.messageIds = [];
-    ctx.session.messageIds.push(ctx.message!.message_id);
     const sent = await ctx.reply(CREDENTIALS.MENU, credentialsMenuKeyboard());
     ctx.session.messageIds.push(sent.message_id);
   }
 
-  @Hears(KEYBOARDS.RESET_PASSWORD)
+  @Action(CallbackAction.MAIN_RESET_PASSWORD)
   async onResetPassword(@Ctx() ctx: BotContext) {
     if (!(await this.authGuard.validate(ctx))) return;
+    await ctx.answerCbQuery();
+    await ctx.deleteMessage();
     if (!ctx.session.messageIds) ctx.session.messageIds = [];
-    ctx.session.messageIds.push(ctx.message!.message_id);
     await ctx.scene.enter(SceneName.RESET_PASSWORD);
   }
 
-  @Hears(KEYBOARDS.LOGOUT)
+  @Action(CallbackAction.MAIN_LOGOUT)
   async onLogout(@Ctx() ctx: BotContext) {
     if (!(await this.authGuard.validate(ctx))) return;
+    await ctx.answerCbQuery();
+    await ctx.deleteMessage();
     if (!ctx.session.messageIds) ctx.session.messageIds = [];
-    ctx.session.messageIds.push(ctx.message!.message_id);
     await ctx.scene.enter(SceneName.LOGOUT);
   }
 

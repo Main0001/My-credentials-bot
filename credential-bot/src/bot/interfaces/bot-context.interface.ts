@@ -3,6 +3,7 @@ import { UserModel } from '../../../generated/prisma/models/User';
 
 export interface BotSession extends Scenes.WizardSession {
   messageIds: number[];
+  menuMessageId?: number;
 }
 
 export interface WizardState {

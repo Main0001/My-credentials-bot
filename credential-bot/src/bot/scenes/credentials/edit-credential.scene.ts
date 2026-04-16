@@ -43,6 +43,11 @@ export class EditCredentialScene {
     await botCtx.scene.leave();
   }
 
+  @Command(BotCommand.MENU)
+  async onMenuAttempt(@Ctx() ctx: Context) {
+    await ctx.reply(COMMON.USE_CANCEL_FIRST);
+  }
+
   @WizardStep(1)
   async stepSelectSource(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
