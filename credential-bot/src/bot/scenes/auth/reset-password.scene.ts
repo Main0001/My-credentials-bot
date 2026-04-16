@@ -82,6 +82,20 @@ export class ResetPasswordScene {
 
   @WizardStep(2)
   async stepWait(@Ctx() ctx: Context) {
-    await ctx.reply(COMMON.USE_BUTTONS_ABOVE);
+    const botCtx = ctx as unknown as BotContext;
+    botCtx.session.messageIds.push(ctx.message!.message_id);
+    await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
+    botCtx.session.messageIds = [];
+    const sent = await ctx.reply(
+      AUTH.RESET_CONFIRM_PROMPT,
+      Markup.inlineKeyboard([
+        Markup.button.callback(
+          KEYBOARDS.YES_DELETE_EVERYTHING,
+          CallbackAction.RESET_CONFIRM,
+        ),
+        Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.RESET_CANCEL),
+      ]),
+    );
+    botCtx.session.messageIds.push(sent.message_id);
   }
 }

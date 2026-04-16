@@ -124,7 +124,15 @@ export class DeleteGroupScene {
   async stepWaitForConfirm(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.session.messageIds.push(ctx.message!.message_id);
-    const sent = await ctx.reply(COMMON.USE_BUTTONS_ABOVE);
+    await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
+    botCtx.session.messageIds = [];
+    const sent = await ctx.reply(
+      GROUPS.DELETE_CONFIRM,
+      Markup.inlineKeyboard([
+        Markup.button.callback(KEYBOARDS.YES_DELETE, CallbackAction.DEL_GROUP_CONFIRM),
+        Markup.button.callback(KEYBOARDS.NO, CallbackAction.DEL_GROUP_CANCEL),
+      ]),
+    );
     botCtx.session.messageIds.push(sent.message_id);
   }
 }

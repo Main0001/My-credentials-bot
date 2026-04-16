@@ -83,6 +83,20 @@ export class LogoutScene {
 
   @WizardStep(2)
   async stepWait(@Ctx() ctx: Context) {
-    await ctx.reply(COMMON.USE_BUTTONS_ABOVE);
+    const botCtx = ctx as unknown as BotContext;
+    botCtx.session.messageIds.push(ctx.message!.message_id);
+    await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
+    botCtx.session.messageIds = [];
+    const sent = await ctx.reply(
+      AUTH.LOGOUT_CONFIRM_PROMPT,
+      Markup.inlineKeyboard([
+        Markup.button.callback(
+          KEYBOARDS.YES_LOGOUT,
+          CallbackAction.LOGOUT_CONFIRM,
+        ),
+        Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.LOGOUT_CANCEL),
+      ]),
+    );
+    botCtx.session.messageIds.push(sent.message_id);
   }
 }
