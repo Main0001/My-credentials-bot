@@ -36,7 +36,6 @@ export class EditCredentialScene {
   @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
     await ctx.reply(COMMON.CANCELLED, credentialsMenuKeyboard());
@@ -135,7 +134,6 @@ export class EditCredentialScene {
   @WizardStep(2)
   async stepWaitForSource(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     const sent = await ctx.reply(COMMON.SELECT_FROM_BUTTONS);
     botCtx.session.messageIds.push(sent.message_id);
   }
@@ -166,7 +164,6 @@ export class EditCredentialScene {
   @WizardStep(3)
   async stepWaitForCredential(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     const sent = await ctx.reply(COMMON.SELECT_CREDENTIAL_FROM_BUTTONS);
     botCtx.session.messageIds.push(sent.message_id);
   }
@@ -188,7 +185,6 @@ export class EditCredentialScene {
   @WizardStep(4)
   async stepWaitForField(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     const sent = await ctx.reply(COMMON.SELECT_FIELD_FROM_BUTTONS);
     botCtx.session.messageIds.push(sent.message_id);
   }
@@ -196,7 +192,6 @@ export class EditCredentialScene {
   @WizardStep(5)
   async stepWaitForField2(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     const sent = await ctx.reply(COMMON.SELECT_FIELD_FROM_BUTTONS);
     botCtx.session.messageIds.push(sent.message_id);
   }
@@ -204,7 +199,6 @@ export class EditCredentialScene {
   @WizardStep(6)
   async stepSaveField(@Ctx() ctx: Context, @Message('text') text: string) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
       const sent = await ctx.reply(CREDENTIALS.ENTER_TEXT_FIELD(this.editField));

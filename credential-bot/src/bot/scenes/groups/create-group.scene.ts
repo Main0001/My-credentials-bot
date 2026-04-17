@@ -27,7 +27,6 @@ export class CreateGroupScene {
   @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
     await ctx.reply(COMMON.CANCELLED, groupsMenuKeyboard());
@@ -51,7 +50,6 @@ export class CreateGroupScene {
   @WizardStep(2)
   async stepSaveGroup(@Ctx() ctx: Context, @Message('text') text: string) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
       const sent = await ctx.reply(COMMON.ENTER_TEXT_NAME);
