@@ -1,6 +1,7 @@
 import { Ctx, Wizard, WizardStep, Message, Command, Action } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { ConfigService } from '@nestjs/config';
+import { Logger } from '@nestjs/common';
 import { UsersService } from '../../../users/users.service';
 import { GroupsService } from '../../../groups/groups.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
@@ -15,6 +16,7 @@ import { KEYBOARDS } from '../../messages/keyboards.messages';
 
 @Wizard(SceneName.EDIT_GROUP)
 export class EditGroupScene {
+  private readonly logger = new Logger(EditGroupScene.name);
   private readonly maxLengthGroup: number;
 
   constructor(
@@ -122,6 +124,9 @@ export class EditGroupScene {
     const user = await this.usersService.findByTelegramId(telegramId);
     const groupId = botCtx.wizard.state.groupId!;
     await this.groupsService.update(groupId, user!.id, text);
+    this.logger.log(
+      `Group renamed: groupId=${groupId}, userId=${user!.id}, newName="${text}"`,
+    );
 
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];

@@ -1,5 +1,6 @@
 import { Ctx, Wizard, WizardStep, Action, Command } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
+import { Logger } from '@nestjs/common';
 import { UsersService } from '../../../users/users.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
 import type { BotContext } from '../../interfaces/bot-context.interface';
@@ -13,6 +14,8 @@ import { mainKeyboard } from '../../keyboards/main.keyboard';
 
 @Wizard(SceneName.LOGOUT)
 export class LogoutScene {
+  private readonly logger = new Logger(LogoutScene.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly messageCleaner: MessageCleaner,
@@ -71,6 +74,9 @@ export class LogoutScene {
 
     if (user) {
       await this.usersService.clearLastActivity(user.id);
+      this.logger.log(
+        `User logged out: telegramId=${telegramId}, userId=${user.id}`,
+      );
     }
 
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);

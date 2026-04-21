@@ -1,5 +1,6 @@
 import { Ctx, Wizard, WizardStep, Message, Command, Action } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
+import { Logger } from '@nestjs/common';
 import { UsersService } from '../../../users/users.service';
 import { GroupsService } from '../../../groups/groups.service';
 import { CredentialsService } from '../../../credentials/credentials.service';
@@ -24,6 +25,7 @@ const FIELD_KEYBOARD = Markup.inlineKeyboard([
 
 @Wizard(SceneName.EDIT_CREDENTIAL)
 export class EditCredentialScene {
+  private readonly logger = new Logger(EditCredentialScene.name);
   private editField: string = '';
 
   constructor(
@@ -213,6 +215,9 @@ export class EditCredentialScene {
     await this.credentialsService.update(credentialId, user!.id, {
       [this.editField]: text,
     });
+    this.logger.log(
+      `Credential field updated: credentialId=${credentialId}, userId=${user!.id}, field=${this.editField}`,
+    );
 
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];

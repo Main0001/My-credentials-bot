@@ -52,11 +52,15 @@ export class InactivityCleanupService {
     if (session.menuMessageId) ids.push(session.menuMessageId);
     if (!ids.length) return;
 
+    let failures = 0;
     for (const messageId of ids) {
       try {
         await this.bot.telegram.deleteMessage(chatId, messageId);
-      } catch {
-        //
+      } catch (err) {
+        failures++;
+        this.logger.debug(
+          `Skip deleteMessage: chatId=${chatId}, messageId=${messageId}, error=${(err as Error).message}`,
+        );
       }
     }
 
@@ -67,7 +71,7 @@ export class InactivityCleanupService {
     });
 
     this.logger.log(
-      `Cleaned ${ids.length} message(s) for telegramId=${telegramId}`,
+      `Cleaned ${ids.length - failures}/${ids.length} message(s) for telegramId=${telegramId}`,
     );
   }
 }

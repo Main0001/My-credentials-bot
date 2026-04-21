@@ -1,6 +1,7 @@
 import { Ctx, Wizard, WizardStep, Message, Action, Command } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { ConfigService } from '@nestjs/config';
+import { Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import dayjs from 'dayjs';
 import { UsersService } from '../../../users/users.service';
@@ -16,6 +17,7 @@ import { KEYBOARDS } from '../../messages/keyboards.messages';
 
 @Wizard(SceneName.ENTER_PASSWORD)
 export class EnterPasswordScene {
+  private readonly logger = new Logger(EnterPasswordScene.name);
   private readonly maxLoginAttempts: number;
   private readonly lockoutDurationMinutes: number;
 
@@ -70,6 +72,9 @@ export class EnterPasswordScene {
 
     if (user?.lockedUntil && dayjs(user.lockedUntil).isAfter(dayjs())) {
       const minutesLeft = dayjs(user.lockedUntil).diff(dayjs(), 'minute') + 1;
+      this.logger.warn(
+        `Login blocked (still locked): telegramId=${telegramId}, minutesLeft=${minutesLeft}`,
+      );
       await ctx.reply(AUTH.LOCKED_OUT(minutesLeft));
       await botCtx.scene.leave();
       return;
@@ -126,6 +131,7 @@ export class EnterPasswordScene {
     const isValid = await bcrypt.compare(text, user.passwordHash);
 
     if (isValid) {
+      this.logger.log(`Login success: telegramId=${telegramId}`);
       await this.usersService.resetFailedAttempts(user.id);
       await this.usersService.updateLastActivity(user.id);
       await this.messageCleaner.deleteMessages(
@@ -139,12 +145,18 @@ export class EnterPasswordScene {
     }
 
     const updated = await this.usersService.incrementFailedAttempts(user.id);
+    this.logger.warn(
+      `Login failed: telegramId=${telegramId}, attempts=${updated.failedLoginAttempts}/${this.maxLoginAttempts}`,
+    );
 
     if (updated.failedLoginAttempts >= this.maxLoginAttempts) {
       const lockedUntil = dayjs()
         .add(this.lockoutDurationMinutes, 'minute')
         .toDate();
       await this.usersService.setLockout(user.id, lockedUntil);
+      this.logger.error(
+        `Account locked out: telegramId=${telegramId}, until=${lockedUntil.toISOString()}`,
+      );
       await this.messageCleaner.deleteMessages(
         botCtx,
         botCtx.session.messageIds,

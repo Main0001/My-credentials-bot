@@ -1,5 +1,6 @@
 import { Ctx, Wizard, WizardStep, Command, Action } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
+import { Logger } from '@nestjs/common';
 import { UsersService } from '../../../users/users.service';
 import { GroupsService } from '../../../groups/groups.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
@@ -14,6 +15,8 @@ import { KEYBOARDS } from '../../messages/keyboards.messages';
 
 @Wizard(SceneName.DELETE_GROUP)
 export class DeleteGroupScene {
+  private readonly logger = new Logger(DeleteGroupScene.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly groupsService: GroupsService,
@@ -110,6 +113,9 @@ export class DeleteGroupScene {
     const user = await this.usersService.findByTelegramId(telegramId);
     const groupId = botCtx.wizard.state.groupId!;
     await this.groupsService.delete(groupId, user!.id);
+    this.logger.log(
+      `Group deleted: groupId=${groupId}, userId=${user!.id}`,
+    );
 
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
