@@ -23,7 +23,6 @@ export class DeleteGroupScene {
   @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
     await ctx.reply(COMMON.CANCELLED, groupsMenuKeyboard());
@@ -97,7 +96,6 @@ export class DeleteGroupScene {
   @WizardStep(2)
   async stepWaitForSelection(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     const sent = await ctx.reply(COMMON.SELECT_GROUP_FROM_BUTTONS);
     botCtx.session.messageIds.push(sent.message_id);
   }
@@ -123,7 +121,6 @@ export class DeleteGroupScene {
   @WizardStep(3)
   async stepWaitForConfirm(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
     const sent = await ctx.reply(

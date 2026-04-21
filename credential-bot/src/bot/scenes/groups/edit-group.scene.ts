@@ -29,7 +29,6 @@ export class EditGroupScene {
   @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
     await ctx.reply(COMMON.CANCELLED, groupsMenuKeyboard());
@@ -97,7 +96,6 @@ export class EditGroupScene {
   @WizardStep(2)
   async stepWaitForSelection(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     const sent = await ctx.reply(COMMON.SELECT_GROUP_FROM_BUTTONS);
     botCtx.session.messageIds.push(sent.message_id);
   }
@@ -105,7 +103,6 @@ export class EditGroupScene {
   @WizardStep(3)
   async stepSaveName(@Ctx() ctx: Context, @Message('text') text: string) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
       const sent = await ctx.reply(COMMON.ENTER_TEXT_NAME);

@@ -60,4 +60,10 @@ export class UsersRepository {
       data: { failedLoginAttempts: 0, lockedUntil },
     });
   }
+
+  findInactive(threshold: Date) {
+    return this.prisma.user.findMany({
+      where: { lastActivityAt: { lt: threshold } },
+    });
+  }
 }

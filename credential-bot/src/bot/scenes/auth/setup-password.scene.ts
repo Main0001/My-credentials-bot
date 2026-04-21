@@ -30,7 +30,6 @@ export class SetupPasswordScene {
   @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
     await ctx.reply(AUTH.SETUP_CANCELLED);
@@ -60,7 +59,6 @@ export class SetupPasswordScene {
     @Message('text') text: string,
   ) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
       const sent = await ctx.reply(COMMON.ENTER_TEXT_PASSWORD);
@@ -85,7 +83,6 @@ export class SetupPasswordScene {
   @WizardStep(3)
   async stepSavePassword(@Ctx() ctx: Context, @Message('text') text: string) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
       const sent = await ctx.reply(COMMON.CONFIRM_TEXT_PASSWORD);

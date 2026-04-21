@@ -25,7 +25,6 @@ export class AddCredentialScene {
   @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
     await ctx.reply(COMMON.CANCELLED, credentialsMenuKeyboard());
@@ -51,7 +50,6 @@ export class AddCredentialScene {
   @Command(BotCommand.SKIP)
   async onSkipTitle(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     botCtx.wizard.state.title = undefined;
     const sent = await ctx.reply(CREDENTIALS.ENTER_LOGIN);
     botCtx.session.messageIds.push(sent.message_id);
@@ -61,7 +59,6 @@ export class AddCredentialScene {
   @WizardStep(2)
   async stepSaveTitle(@Ctx() ctx: Context, @Message('text') text: string) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
       const sent = await ctx.reply(COMMON.ENTER_TEXT_OR_SKIP);
@@ -78,7 +75,6 @@ export class AddCredentialScene {
   @WizardStep(3)
   async stepEnterLogin(@Ctx() ctx: Context, @Message('text') text: string) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
       const sent = await ctx.reply(COMMON.ENTER_TEXT_LOGIN);
@@ -95,7 +91,6 @@ export class AddCredentialScene {
   @WizardStep(4)
   async stepEnterPassword(@Ctx() ctx: Context, @Message('text') text: string) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
       const sent = await ctx.reply(COMMON.ENTER_TEXT_PASSWORD);
@@ -154,7 +149,6 @@ export class AddCredentialScene {
   @WizardStep(5)
   async stepWaitForGroup(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     const sent = await ctx.reply(COMMON.SELECT_GROUP_FROM_BUTTONS);
     botCtx.session.messageIds.push(sent.message_id);
   }

@@ -40,4 +40,9 @@ export class UsersService {
   setLockout(userId: string, lockedUntil: Date) {
     return this.usersRepository.setLockout(userId, lockedUntil);
   }
+
+  findInactive(hours: number) {
+    const threshold = new Date(Date.now() - hours * 60 * 60 * 1000);
+    return this.usersRepository.findInactive(threshold);
+  }
 }

@@ -31,6 +31,12 @@ export const configuration = () => ({
   groups: {
     maxLengthGroup: env.get('MAX_LENGTH_GROUP').required().asIntPositive(),
   },
+  redis: {
+    host: env.get('REDIS_HOST').required().asString(),
+    port: env.get('REDIS_PORT').required().asPortNumber(),
+    password: env.get('REDIS_PASSWORD').asString(),
+    sessionTtlSeconds: env.get('REDIS_SESSION_TTL_SECONDS').asIntPositive(),
+  },
 });
 
 export type AppConfig = ReturnType<typeof configuration>;

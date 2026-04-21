@@ -103,7 +103,6 @@ export class EnterPasswordScene {
   @WizardStep(2)
   async stepCheckPassword(@Ctx() ctx: Context, @Message('text') text: string) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
       const sent = await ctx.reply(COMMON.ENTER_TEXT_PASSWORD);
