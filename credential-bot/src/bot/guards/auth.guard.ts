@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { BotContext } from '../interfaces/bot-context.interface';
 import dayjs from 'dayjs';
@@ -8,6 +8,7 @@ import { SceneName } from '../constants/scenes.enum';
 
 @Injectable()
 export class AuthGuard {
+  private readonly logger = new Logger(AuthGuard.name);
   private readonly inactivityTimeoutHours: number;
 
   constructor(
@@ -24,17 +25,22 @@ export class AuthGuard {
     const telegramId = ctx.from?.id?.toString();
 
     if (!telegramId) {
+      this.logger.warn('Validation failed: missing telegramId');
       return false;
     }
 
     const user = await this.usersService.findByTelegramId(telegramId);
 
     if (!user) {
+      this.logger.log(`Unknown user, entering setup: telegramId=${telegramId}`);
       await ctx.scene.enter(SceneName.SETUP_PASSWORD);
       return false;
     }
 
     if (this.isSessionExpired(user.lastActivityAt)) {
+      this.logger.log(
+        `Session expired, re-auth required: telegramId=${telegramId}`,
+      );
       if (ctx.session?.messageIds?.length) {
         await this.messageCleaner.deleteMessages(ctx, ctx.session.messageIds);
         ctx.session.messageIds = [];

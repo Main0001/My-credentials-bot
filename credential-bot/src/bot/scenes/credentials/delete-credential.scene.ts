@@ -1,5 +1,6 @@
 import { Ctx, Wizard, WizardStep, Command, Action } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
+import { Logger } from '@nestjs/common';
 import { UsersService } from '../../../users/users.service';
 import { GroupsService } from '../../../groups/groups.service';
 import { CredentialsService } from '../../../credentials/credentials.service';
@@ -15,6 +16,8 @@ import { KEYBOARDS } from '../../messages/keyboards.messages';
 
 @Wizard(SceneName.DELETE_CREDENTIAL)
 export class DeleteCredentialScene {
+  private readonly logger = new Logger(DeleteCredentialScene.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly groupsService: GroupsService,
@@ -164,6 +167,9 @@ export class DeleteCredentialScene {
     const user = await this.usersService.findByTelegramId(telegramId);
     const credentialId = botCtx.wizard.state.credentialId!;
     await this.credentialsService.delete(credentialId, user!.id);
+    this.logger.log(
+      `Credential deleted: credentialId=${credentialId}, userId=${user!.id}`,
+    );
 
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];

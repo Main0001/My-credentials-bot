@@ -1,5 +1,6 @@
 import { Ctx, Wizard, WizardStep, Message, Command, Action } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
+import { Logger } from '@nestjs/common';
 import { UsersService } from '../../../users/users.service';
 import { GroupsService } from '../../../groups/groups.service';
 import { CredentialsService } from '../../../credentials/credentials.service';
@@ -15,6 +16,8 @@ import { KEYBOARDS } from '../../messages/keyboards.messages';
 
 @Wizard(SceneName.ADD_CREDENTIAL)
 export class AddCredentialScene {
+  private readonly logger = new Logger(AddCredentialScene.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly groupsService: GroupsService,
@@ -159,12 +162,15 @@ export class AddCredentialScene {
     userId: string,
     groupId: string | undefined,
   ) {
-    await this.credentialsService.create(userId, {
+    const credential = await this.credentialsService.create(userId, {
       title: botCtx.wizard.state.title,
       login: botCtx.wizard.state.login!,
       password: botCtx.wizard.state.password!,
       groupId,
     });
+    this.logger.log(
+      `Credential added: credentialId=${credential.id}, userId=${userId}, groupId=${groupId ?? 'none'}`,
+    );
 
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];

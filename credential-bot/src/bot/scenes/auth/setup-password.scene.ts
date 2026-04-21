@@ -1,6 +1,7 @@
 import { Ctx, Wizard, WizardStep, Message, Command } from 'nestjs-telegraf';
 import { Context } from 'telegraf';
 import { ConfigService } from '@nestjs/config';
+import { Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../../../users/users.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
@@ -13,6 +14,7 @@ import { COMMON } from '../../messages/common.messages';
 
 @Wizard(SceneName.SETUP_PASSWORD)
 export class SetupPasswordScene {
+  private readonly logger = new Logger(SetupPasswordScene.name);
   private readonly saltForHash: number;
   private readonly maxConfirmAttempts: number;
 
@@ -92,8 +94,15 @@ export class SetupPasswordScene {
 
     if (text !== botCtx.wizard.state.password) {
       botCtx.wizard.state.attempts = (botCtx.wizard.state.attempts ?? 0) + 1;
+      const telegramId = ctx.from!.id.toString();
+      this.logger.warn(
+        `Setup password mismatch: telegramId=${telegramId}, attempts=${botCtx.wizard.state.attempts}/${this.maxConfirmAttempts}`,
+      );
 
       if (botCtx.wizard.state.attempts >= this.maxConfirmAttempts) {
+        this.logger.warn(
+          `Setup aborted (too many confirmation failures): telegramId=${telegramId}`,
+        );
         await this.messageCleaner.deleteMessages(
           botCtx,
           botCtx.session.messageIds,
@@ -120,6 +129,9 @@ export class SetupPasswordScene {
 
     const user = await this.usersService.create(telegramId, passwordHash);
     await this.usersService.updateLastActivity(user.id);
+    this.logger.log(
+      `Password initialized for new user: telegramId=${telegramId}, userId=${user.id}`,
+    );
 
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];

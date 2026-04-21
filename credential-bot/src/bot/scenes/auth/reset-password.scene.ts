@@ -1,5 +1,6 @@
 import { Ctx, Wizard, WizardStep, Action, Command } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
+import { Logger } from '@nestjs/common';
 import { UsersService } from '../../../users/users.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
 import type { BotContext } from '../../interfaces/bot-context.interface';
@@ -13,6 +14,8 @@ import { mainKeyboard } from '../../keyboards/main.keyboard';
 
 @Wizard(SceneName.RESET_PASSWORD)
 export class ResetPasswordScene {
+  private readonly logger = new Logger(ResetPasswordScene.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly messageCleaner: MessageCleaner,
@@ -70,6 +73,9 @@ export class ResetPasswordScene {
     const user = await this.usersService.findByTelegramId(telegramId);
 
     if (user) {
+      this.logger.warn(
+        `Account reset (all data deleted): telegramId=${telegramId}, userId=${user.id}`,
+      );
       await this.usersService.delete(user.id);
     }
 

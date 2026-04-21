@@ -1,5 +1,5 @@
 import { Update, Start, Ctx, Action, Command, InjectBot } from 'nestjs-telegraf';
-import { OnModuleInit } from '@nestjs/common';
+import { OnModuleInit, Logger } from '@nestjs/common';
 import { Telegraf } from 'telegraf';
 import type { BotContext } from './interfaces/bot-context.interface';
 import { AuthGuard } from './guards/auth.guard';
@@ -20,6 +20,8 @@ import { KEYBOARDS } from './messages/keyboards.messages';
 
 @Update()
 export class BotUpdate implements OnModuleInit {
+  private readonly logger = new Logger(BotUpdate.name);
+
   constructor(
     @InjectBot() private readonly bot: Telegraf<BotContext>,
     private readonly authGuard: AuthGuard,
@@ -32,8 +34,16 @@ export class BotUpdate implements OnModuleInit {
     await this.bot.telegram.setMyShortDescription(BOT_SHORT_DESCRIPTION);
   }
 
+  private async enterScene(ctx: BotContext, sceneName: SceneName) {
+    this.logger.log(
+      `Scene entry: ${sceneName}, telegramId=${ctx.from?.id}`,
+    );
+    await ctx.scene.enter(sceneName);
+  }
+
   @Start()
   async onStart(@Ctx() ctx: BotContext) {
+    this.logger.log(`Bot started: telegramId=${ctx.from?.id}`);
     await ctx.reply(
       AUTH.WELCOME(ctx.from?.first_name ?? ''),
       mainKeyboard(),
@@ -81,7 +91,7 @@ export class BotUpdate implements OnModuleInit {
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
     if (!ctx.session.messageIds) ctx.session.messageIds = [];
-    await ctx.scene.enter(SceneName.RESET_PASSWORD);
+    await this.enterScene(ctx, SceneName.RESET_PASSWORD);
   }
 
   @Action(CallbackAction.MAIN_LOGOUT)
@@ -90,7 +100,7 @@ export class BotUpdate implements OnModuleInit {
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
     if (!ctx.session.messageIds) ctx.session.messageIds = [];
-    await ctx.scene.enter(SceneName.LOGOUT);
+    await this.enterScene(ctx, SceneName.LOGOUT);
   }
 
   @Action(CallbackAction.BACK_TO_MAIN)
@@ -106,7 +116,7 @@ export class BotUpdate implements OnModuleInit {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
-    await ctx.scene.enter(SceneName.CREATE_GROUP);
+    await this.enterScene(ctx, SceneName.CREATE_GROUP);
   }
 
   @Action(CallbackAction.GROUP_VIEW)
@@ -114,7 +124,7 @@ export class BotUpdate implements OnModuleInit {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
-    await ctx.scene.enter(SceneName.VIEW_GROUPS);
+    await this.enterScene(ctx, SceneName.VIEW_GROUPS);
   }
 
   @Action(CallbackAction.GROUP_EDIT)
@@ -122,7 +132,7 @@ export class BotUpdate implements OnModuleInit {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
-    await ctx.scene.enter(SceneName.EDIT_GROUP);
+    await this.enterScene(ctx, SceneName.EDIT_GROUP);
   }
 
   @Action(CallbackAction.GROUP_DELETE)
@@ -130,7 +140,7 @@ export class BotUpdate implements OnModuleInit {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
-    await ctx.scene.enter(SceneName.DELETE_GROUP);
+    await this.enterScene(ctx, SceneName.DELETE_GROUP);
   }
 
   @Action(CallbackAction.CREDENTIAL_ADD)
@@ -138,7 +148,7 @@ export class BotUpdate implements OnModuleInit {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
-    await ctx.scene.enter(SceneName.ADD_CREDENTIAL);
+    await this.enterScene(ctx, SceneName.ADD_CREDENTIAL);
   }
 
   @Action(CallbackAction.CREDENTIAL_VIEW_ALL)
@@ -146,7 +156,7 @@ export class BotUpdate implements OnModuleInit {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
-    await ctx.scene.enter(SceneName.VIEW_ALL_CREDENTIALS);
+    await this.enterScene(ctx, SceneName.VIEW_ALL_CREDENTIALS);
   }
 
   @Action(CallbackAction.CREDENTIAL_VIEW_BY_GROUP)
@@ -154,7 +164,7 @@ export class BotUpdate implements OnModuleInit {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
-    await ctx.scene.enter(SceneName.VIEW_BY_GROUP);
+    await this.enterScene(ctx, SceneName.VIEW_BY_GROUP);
   }
 
   @Action(CallbackAction.CREDENTIAL_VIEW_NO_GROUP)
@@ -162,7 +172,7 @@ export class BotUpdate implements OnModuleInit {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
-    await ctx.scene.enter(SceneName.VIEW_WITHOUT_GROUP);
+    await this.enterScene(ctx, SceneName.VIEW_WITHOUT_GROUP);
   }
 
   @Action(CallbackAction.CREDENTIAL_EDIT)
@@ -170,7 +180,7 @@ export class BotUpdate implements OnModuleInit {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
-    await ctx.scene.enter(SceneName.EDIT_CREDENTIAL);
+    await this.enterScene(ctx, SceneName.EDIT_CREDENTIAL);
   }
 
   @Action(CallbackAction.CREDENTIAL_DELETE)
@@ -178,6 +188,6 @@ export class BotUpdate implements OnModuleInit {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
-    await ctx.scene.enter(SceneName.DELETE_CREDENTIAL);
+    await this.enterScene(ctx, SceneName.DELETE_CREDENTIAL);
   }
 }
