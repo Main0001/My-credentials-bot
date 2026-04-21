@@ -6,6 +6,7 @@ import type { AsyncSessionStore } from 'telegraf/session';
 import { BotUpdate } from './bot.update';
 import { AuthGuard } from './guards/auth.guard';
 import { MessageCleaner } from './helpers/message-cleaner';
+import { InactivityCleanupService } from './cleanup/inactivity-cleanup.service';
 import { RedisSessionStore } from './session/redis-session.store';
 import { trackMessageIdMiddleware } from './middleware/track-message-id.middleware';
 import type { BotSession } from './interfaces/bot-context.interface';
@@ -57,6 +58,7 @@ import { DeleteCredentialScene } from './scenes/credentials/delete-credential.sc
     BotUpdate,
     AuthGuard,
     MessageCleaner,
+    InactivityCleanupService,
     SetupPasswordScene,
     EnterPasswordScene,
     ResetPasswordScene,

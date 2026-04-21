@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { configuration } from './config/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
@@ -13,6 +14,7 @@ import { AppService } from './app.service';
       isGlobal: true,
       load: [configuration],
     }),
+    ScheduleModule.forRoot(),
     PrismaModule,
     RedisModule,
     BotModule,
