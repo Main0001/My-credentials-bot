@@ -135,8 +135,10 @@ export class SetupPasswordScene {
 
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
+    await this.messageCleaner.deleteMenuMessage(botCtx);
 
-    await ctx.reply(AUTH.PASSWORD_SET, mainKeyboard());
+    const sent = await ctx.reply(AUTH.PASSWORD_SET, mainKeyboard());
+    botCtx.session.menuMessageId = sent.message_id;
     await botCtx.scene.leave();
   }
 }
