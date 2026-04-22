@@ -1,12 +1,13 @@
-import { Ctx, Wizard, WizardStep, Action } from 'nestjs-telegraf';
+import { Ctx, Wizard, WizardStep, Action, Command } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { UsersService } from '../../../users/users.service';
 import { CredentialsService } from '../../../credentials/credentials.service';
 import { credentialsMenuKeyboard } from '../../keyboards/credentials.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
 import { SceneName } from '../../constants/scenes.enum';
+import { BotCommand } from '../../constants/commands.enum';
 import { CallbackAction } from '../../constants/actions.enum';
-import { CREDENTIALS } from '../../messages/credentials.messages';
+import { CREDENTIALS, formatCredentialLine } from '../../messages/credentials.messages';
 import { COMMON } from '../../messages/common.messages';
 import { KEYBOARDS } from '../../messages/keyboards.messages';
 
@@ -16,6 +17,11 @@ export class ViewAllCredentialsScene {
     private readonly usersService: UsersService,
     private readonly credentialsService: CredentialsService,
   ) {}
+
+  @Command(BotCommand.MENU)
+  async onMenuAttempt(@Ctx() ctx: Context) {
+    await ctx.reply(COMMON.USE_CANCEL_FIRST);
+  }
 
   @WizardStep(1)
   async stepShowCredentials(@Ctx() ctx: Context) {
@@ -32,14 +38,22 @@ export class ViewAllCredentialsScene {
       return;
     }
 
-    const list = credentials.map((c, i) => {
-      const title = c.title ? `${c.title} — ` : '';
-      return `${i + 1}. ${title}${c.login} : ${c.password}`;
-    }).join('\n');
+    const list = credentials
+      .sort((a, b) => {
+        const labelA = a.title ?? a.login;
+        const labelB = b.title ?? b.login;
+        return labelA > labelB ? 1 : labelA < labelB ? -1 : 0;
+      })
+      .map((c, i) =>
+        `${i + 1}. ${formatCredentialLine(c.title, c.login, c.password)}`,
+      ).join('\n');
 
     const sent = await ctx.reply(
       CREDENTIALS.LIST_ALL(list),
-      Markup.inlineKeyboard([[Markup.button.callback(KEYBOARDS.BACK, CallbackAction.VIEW_ALL_CRED_BACK)]]),
+      {
+        parse_mode: 'HTML',
+        ...Markup.inlineKeyboard([[Markup.button.callback(KEYBOARDS.BACK, CallbackAction.VIEW_ALL_CRED_BACK)]]),
+      },
     );
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();

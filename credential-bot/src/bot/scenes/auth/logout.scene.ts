@@ -12,9 +12,9 @@ import { COMMON } from '../../messages/common.messages';
 import { KEYBOARDS } from '../../messages/keyboards.messages';
 import { mainKeyboard } from '../../keyboards/main.keyboard';
 
-@Wizard(SceneName.RESET_PASSWORD)
-export class ResetPasswordScene {
-  private readonly logger = new Logger(ResetPasswordScene.name);
+@Wizard(SceneName.LOGOUT)
+export class LogoutScene {
+  private readonly logger = new Logger(LogoutScene.name);
 
   constructor(
     private readonly usersService: UsersService,
@@ -41,29 +41,29 @@ export class ResetPasswordScene {
     botCtx.session.messageIds = [];
 
     const sent = await ctx.reply(
-      AUTH.RESET_CONFIRM_PROMPT,
+      AUTH.LOGOUT_CONFIRM_PROMPT,
       Markup.inlineKeyboard([
         Markup.button.callback(
-          KEYBOARDS.YES_DELETE_EVERYTHING,
-          CallbackAction.RESET_CONFIRM,
+          KEYBOARDS.YES_LOGOUT,
+          CallbackAction.LOGOUT_CONFIRM,
         ),
-        Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.RESET_CANCEL),
+        Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.LOGOUT_CANCEL),
       ]),
     );
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.next();
   }
 
-  @Action(CallbackAction.RESET_CANCEL)
+  @Action(CallbackAction.LOGOUT_CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
     await botCtx.deleteMessage();
-    await ctx.reply(AUTH.RESET_CANCELLED);
+    await ctx.reply(AUTH.LOGOUT_CANCELLED);
     await botCtx.scene.leave();
   }
 
-  @Action(CallbackAction.RESET_CONFIRM)
+  @Action(CallbackAction.LOGOUT_CONFIRM)
   async onConfirm(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
@@ -73,16 +73,17 @@ export class ResetPasswordScene {
     const user = await this.usersService.findByTelegramId(telegramId);
 
     if (user) {
-      this.logger.warn(
-        `Account reset (all data deleted): telegramId=${telegramId}, userId=${user.id}`,
+      await this.usersService.clearLastActivity(user.id);
+      this.logger.log(
+        `User logged out: telegramId=${telegramId}, userId=${user.id}`,
       );
-      await this.usersService.delete(user.id);
     }
 
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
 
-    await botCtx.scene.enter(SceneName.SETUP_PASSWORD);
+    await ctx.reply(AUTH.LOGOUT_SUCCESS);
+    await botCtx.scene.enter(SceneName.ENTER_PASSWORD);
   }
 
   @WizardStep(2)
@@ -91,13 +92,13 @@ export class ResetPasswordScene {
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
     const sent = await ctx.reply(
-      AUTH.RESET_CONFIRM_PROMPT,
+      AUTH.LOGOUT_CONFIRM_PROMPT,
       Markup.inlineKeyboard([
         Markup.button.callback(
-          KEYBOARDS.YES_DELETE_EVERYTHING,
-          CallbackAction.RESET_CONFIRM,
+          KEYBOARDS.YES_LOGOUT,
+          CallbackAction.LOGOUT_CONFIRM,
         ),
-        Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.RESET_CANCEL),
+        Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.LOGOUT_CANCEL),
       ]),
     );
     botCtx.session.messageIds.push(sent.message_id);

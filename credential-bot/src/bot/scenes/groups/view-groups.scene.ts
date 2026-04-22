@@ -1,10 +1,11 @@
-import { Ctx, Wizard, WizardStep, Action } from 'nestjs-telegraf';
+import { Ctx, Wizard, WizardStep, Action, Command } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { UsersService } from '../../../users/users.service';
 import { GroupsService } from '../../../groups/groups.service';
 import { groupsMenuKeyboard } from '../../keyboards/groups.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
 import { SceneName } from '../../constants/scenes.enum';
+import { BotCommand } from '../../constants/commands.enum';
 import { CallbackAction } from '../../constants/actions.enum';
 import { GROUPS } from '../../messages/groups.messages';
 import { COMMON } from '../../messages/common.messages';
@@ -16,6 +17,11 @@ export class ViewGroupsScene {
     private readonly usersService: UsersService,
     private readonly groupsService: GroupsService,
   ) {}
+
+  @Command(BotCommand.MENU)
+  async onMenuAttempt(@Ctx() ctx: Context) {
+    await ctx.reply(COMMON.USE_CANCEL_FIRST);
+  }
 
   @WizardStep(1)
   async stepShowGroups(@Ctx() ctx: Context) {
@@ -32,7 +38,9 @@ export class ViewGroupsScene {
       return;
     }
 
-    const list = groups.map((g, i) => `${i + 1}. ${g.name}`).join('\n');
+    const list = groups
+      .sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0))
+      .map((g, i) => `${i + 1}. ${g.name}`).join('\n');
     const sent = await ctx.reply(
       GROUPS.LIST(list),
       Markup.inlineKeyboard([[Markup.button.callback(KEYBOARDS.BACK, CallbackAction.VIEW_GROUPS_BACK)]]),

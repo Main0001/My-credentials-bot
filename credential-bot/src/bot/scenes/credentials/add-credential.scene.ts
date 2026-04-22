@@ -1,5 +1,6 @@
 import { Ctx, Wizard, WizardStep, Message, Command, Action } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
+import { Logger } from '@nestjs/common';
 import { UsersService } from '../../../users/users.service';
 import { GroupsService } from '../../../groups/groups.service';
 import { CredentialsService } from '../../../credentials/credentials.service';
@@ -15,6 +16,8 @@ import { KEYBOARDS } from '../../messages/keyboards.messages';
 
 @Wizard(SceneName.ADD_CREDENTIAL)
 export class AddCredentialScene {
+  private readonly logger = new Logger(AddCredentialScene.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly groupsService: GroupsService,
@@ -25,11 +28,15 @@ export class AddCredentialScene {
   @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
     await ctx.reply(COMMON.CANCELLED, credentialsMenuKeyboard());
     await botCtx.scene.leave();
+  }
+
+  @Command(BotCommand.MENU)
+  async onMenuAttempt(@Ctx() ctx: Context) {
+    await ctx.reply(COMMON.USE_CANCEL_FIRST);
   }
 
   @WizardStep(1)
@@ -46,7 +53,6 @@ export class AddCredentialScene {
   @Command(BotCommand.SKIP)
   async onSkipTitle(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     botCtx.wizard.state.title = undefined;
     const sent = await ctx.reply(CREDENTIALS.ENTER_LOGIN);
     botCtx.session.messageIds.push(sent.message_id);
@@ -56,7 +62,6 @@ export class AddCredentialScene {
   @WizardStep(2)
   async stepSaveTitle(@Ctx() ctx: Context, @Message('text') text: string) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
       const sent = await ctx.reply(COMMON.ENTER_TEXT_OR_SKIP);
@@ -73,7 +78,6 @@ export class AddCredentialScene {
   @WizardStep(3)
   async stepEnterLogin(@Ctx() ctx: Context, @Message('text') text: string) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
       const sent = await ctx.reply(COMMON.ENTER_TEXT_LOGIN);
@@ -90,7 +94,6 @@ export class AddCredentialScene {
   @WizardStep(4)
   async stepEnterPassword(@Ctx() ctx: Context, @Message('text') text: string) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
       const sent = await ctx.reply(COMMON.ENTER_TEXT_PASSWORD);
@@ -109,9 +112,11 @@ export class AddCredentialScene {
       return;
     }
 
-    const buttons = groups.map((g) =>
-      [Markup.button.callback(g.name, `${ActionPrefix.ADD_CRED_GROUP}${g.id}`)]
-    );
+    const buttons = groups
+      .sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0))
+      .map((g) =>
+        [Markup.button.callback(g.name, `${ActionPrefix.ADD_CRED_GROUP}${g.id}`)]
+      );
     buttons.push([Markup.button.callback(KEYBOARDS.WITHOUT_GROUP, CallbackAction.ADD_CRED_NO_GROUP)]);
 
     const sent = await ctx.reply(CREDENTIALS.SELECT_GROUP, Markup.inlineKeyboard(buttons));
@@ -147,7 +152,6 @@ export class AddCredentialScene {
   @WizardStep(5)
   async stepWaitForGroup(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     const sent = await ctx.reply(COMMON.SELECT_GROUP_FROM_BUTTONS);
     botCtx.session.messageIds.push(sent.message_id);
   }
@@ -158,12 +162,15 @@ export class AddCredentialScene {
     userId: string,
     groupId: string | undefined,
   ) {
-    await this.credentialsService.create(userId, {
+    const credential = await this.credentialsService.create(userId, {
       title: botCtx.wizard.state.title,
       login: botCtx.wizard.state.login!,
       password: botCtx.wizard.state.password!,
       groupId,
     });
+    this.logger.log(
+      `Credential added: credentialId=${credential.id}, userId=${userId}, groupId=${groupId ?? 'none'}`,
+    );
 
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];

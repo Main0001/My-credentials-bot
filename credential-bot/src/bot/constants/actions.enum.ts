@@ -1,6 +1,10 @@
 export enum CallbackAction {
   // Main menu
   BACK_TO_MAIN = 'back_to_main',
+  MAIN_GROUPS = 'main_groups',
+  MAIN_CREDENTIALS = 'main_credentials',
+  MAIN_RESET_PASSWORD = 'main_reset_password',
+  MAIN_LOGOUT = 'main_logout',
 
   // Groups menu
   GROUP_CREATE = 'group_create',
@@ -20,6 +24,8 @@ export enum CallbackAction {
   ENTER_PW_RESET = 'enter_pw_reset',
   RESET_CONFIRM = 'reset_confirm',
   RESET_CANCEL = 'reset_cancel',
+  LOGOUT_CONFIRM = 'logout_confirm',
+  LOGOUT_CANCEL = 'logout_cancel',
 
   // Delete group scene
   DEL_GROUP_CONFIRM = 'del_group_confirm',
@@ -48,6 +54,7 @@ export enum CallbackAction {
 
   // View credentials scenes
   VIEW_ALL_CRED_BACK = 'view_all_cred_back',
+  VBG_NO_GROUP = 'vbg_no_group',
   VBG_CANCEL = 'vbg_cancel',
   VBG_BACK = 'vbg_back',
   VWG_BACK = 'vwg_back',

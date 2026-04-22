@@ -23,9 +23,19 @@ export const configuration = () => ({
       .get('MAX_CONFIRM_ATTEMPTS')
       .required()
       .asIntPositive(),
+    lockoutDurationMinutes: env
+      .get('LOCKOUT_DURATION_MINUTES')
+      .required()
+      .asIntPositive(),
   },
   groups: {
     maxLengthGroup: env.get('MAX_LENGTH_GROUP').required().asIntPositive(),
+  },
+  redis: {
+    host: env.get('REDIS_HOST').required().asString(),
+    port: env.get('REDIS_PORT').required().asPortNumber(),
+    password: env.get('REDIS_PASSWORD').asString(),
+    sessionTtlSeconds: env.get('REDIS_SESSION_TTL_SECONDS').asIntPositive(),
   },
 });
 

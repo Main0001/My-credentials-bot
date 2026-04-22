@@ -21,7 +21,28 @@ export class UsersService {
     return this.usersRepository.updateLastActivity(userId);
   }
 
+  clearLastActivity(userId: string) {
+    return this.usersRepository.clearLastActivity(userId);
+  }
+
   delete(userId: string) {
     return this.usersRepository.delete(userId);
+  }
+
+  incrementFailedAttempts(userId: string) {
+    return this.usersRepository.incrementFailedAttempts(userId);
+  }
+
+  resetFailedAttempts(userId: string) {
+    return this.usersRepository.resetFailedAttempts(userId);
+  }
+
+  setLockout(userId: string, lockedUntil: Date) {
+    return this.usersRepository.setLockout(userId, lockedUntil);
+  }
+
+  findInactive(hours: number) {
+    const threshold = new Date(Date.now() - hours * 60 * 60 * 1000);
+    return this.usersRepository.findInactive(threshold);
   }
 }

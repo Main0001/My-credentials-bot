@@ -1,3 +1,12 @@
+export const formatCredentialLine = (
+  title: string | null,
+  login: string,
+  password: string,
+): string => {
+  const titlePart = title ? `${title} — ` : '';
+  return `${titlePart}<code>${login}</code> : <tg-spoiler>${password}</tg-spoiler>`;
+};
+
 export const CREDENTIALS = {
   MENU: 'Credentials menu 🔑:',
   NO_CREDENTIALS: 'ℹ️ You have no credentials.',
@@ -6,21 +15,21 @@ export const CREDENTIALS = {
   NO_CREDENTIALS_WITHOUT_GROUP: 'ℹ️ No credentials without group.',
 
   ADD_TITLE_PROMPT: '📝 Enter credential title (or send /skip to skip):\n\nSend /cancel to abort.',
-  ENTER_LOGIN: '🔤 Enter login:',
-  ENTER_PASSWORD: '🔑 Enter password:',
-  SELECT_GROUP: '📁 Select group:',
-  SELECT_GROUP_OR_NONE: '📁 Select group or "Without group":',
+  ENTER_LOGIN: '🔤 Enter login:\n\nSend /cancel to abort.',
+  ENTER_PASSWORD: '🔑 Enter password:\n\nSend /cancel to abort.',
+  SELECT_GROUP: '📁 Select group:\n\nSend /cancel to abort.',
+  SELECT_GROUP_OR_NONE: '📁 Select group or "Without group":\n\nSend /cancel to abort.',
   ADDED: '✅ Credential added!',
 
-  SELECT_TO_EDIT: '✏️ Select credential to edit:',
-  WHAT_TO_EDIT: '✏️ What do you want to edit?',
-  ENTER_NEW_FIELD: (field: string) => `📝 Enter new ${field}:`,
+  SELECT_TO_EDIT: '✏️ Select credential to edit:\n\nSend /cancel to abort.',
+  CURRENT_CREDENTIAL: (line: string) => `📋 Current data:\n${line}\n\n✏️ What do you want to edit?\n\nSend /cancel to abort.`,
+  ENTER_NEW_FIELD: (field: string) => `📝 Enter new ${field}:\n\nSend /cancel to abort.`,
   ENTER_TEXT_FIELD: (field: string) => `Please enter a text ${field}:`,
-  FIELD_UPDATED: (field: string) =>
-    `✅ ${field} updated!\n\n✏️ What do you want to edit?`,
+  FIELD_UPDATED: (field: string, line: string) =>
+    `✅ ${field} updated!\n\n📋 Current data:\n${line}\n\n✏️ What do you want to edit?\n\nSend /cancel to abort.`,
 
-  SELECT_TO_DELETE: '🗑️ Select credential to delete:',
-  DELETE_CONFIRM: '⚠️ Are you sure you want to delete this credential?',
+  SELECT_TO_DELETE: '🗑️ Select credential to delete:\n\nSend /cancel to abort.',
+  DELETE_CONFIRM: '⚠️ Are you sure you want to delete this credential?\n\nSend /cancel to abort.',
   DELETED: '✅ Credential deleted!',
 
   LIST_ALL: (list: string) => `🔑 Your credentials:\n\n${list}`,

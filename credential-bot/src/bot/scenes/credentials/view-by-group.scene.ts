@@ -1,4 +1,4 @@
-import { Ctx, Wizard, WizardStep, Action } from 'nestjs-telegraf';
+import { Ctx, Wizard, WizardStep, Action, Command } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { UsersService } from '../../../users/users.service';
 import { GroupsService } from '../../../groups/groups.service';
@@ -6,8 +6,9 @@ import { CredentialsService } from '../../../credentials/credentials.service';
 import { credentialsMenuKeyboard } from '../../keyboards/credentials.keyboard';
 import type { BotContext } from '../../interfaces/bot-context.interface';
 import { SceneName } from '../../constants/scenes.enum';
+import { BotCommand } from '../../constants/commands.enum';
 import { CallbackAction, ActionPrefix } from '../../constants/actions.enum';
-import { CREDENTIALS } from '../../messages/credentials.messages';
+import { CREDENTIALS, formatCredentialLine } from '../../messages/credentials.messages';
 import { GROUPS } from '../../messages/groups.messages';
 import { COMMON } from '../../messages/common.messages';
 import { KEYBOARDS } from '../../messages/keyboards.messages';
@@ -19,6 +20,11 @@ export class ViewByGroupScene {
     private readonly groupsService: GroupsService,
     private readonly credentialsService: CredentialsService,
   ) {}
+
+  @Command(BotCommand.MENU)
+  async onMenuAttempt(@Ctx() ctx: Context) {
+    await ctx.reply(COMMON.USE_CANCEL_FIRST);
+  }
 
   @WizardStep(1)
   async stepSelectGroup(@Ctx() ctx: Context) {
@@ -35,9 +41,14 @@ export class ViewByGroupScene {
       return;
     }
 
-    const buttons = groups.map((g) =>
-      [Markup.button.callback(g.name, `${ActionPrefix.VBG}${g.id}`)]
-    );
+    const buttons: ReturnType<typeof Markup.button.callback>[][] = [
+      [Markup.button.callback(KEYBOARDS.WITHOUT_GROUP, CallbackAction.VBG_NO_GROUP)],
+    ];
+    groups
+      .sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0))
+      .forEach((g) =>
+        buttons.push([Markup.button.callback(g.name, `${ActionPrefix.VBG}${g.id}`)])
+      );
     buttons.push([Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.VBG_CANCEL)]);
 
     const sent = await ctx.reply(CREDENTIALS.SELECT_GROUP, Markup.inlineKeyboard(buttons));
@@ -54,7 +65,43 @@ export class ViewByGroupScene {
     await botCtx.scene.leave();
   }
 
-  @Action(/^vbg_(?!cancel$)/)
+  @Action(CallbackAction.VBG_NO_GROUP)
+  async onNoGroup(@Ctx() ctx: Context) {
+    const botCtx = ctx as unknown as BotContext;
+    await botCtx.answerCbQuery();
+    await botCtx.deleteMessage();
+
+    const telegramId = ctx.from!.id.toString();
+    const user = await this.usersService.findByTelegramId(telegramId);
+    const credentials = await this.credentialsService.findWithoutGroup(user!.id);
+
+    if (!credentials.length) {
+      await ctx.reply(CREDENTIALS.NO_CREDENTIALS_WITHOUT_GROUP, credentialsMenuKeyboard());
+      await botCtx.scene.leave();
+      return;
+    }
+
+    const list = credentials
+      .sort((a, b) => {
+        const labelA = a.title ?? a.login;
+        const labelB = b.title ?? b.login;
+        return labelA > labelB ? 1 : labelA < labelB ? -1 : 0;
+      })
+      .map((c, i) =>
+        `${i + 1}. ${formatCredentialLine(c.title, c.login, c.password)}`,
+      ).join('\n');
+
+    await ctx.reply(
+      CREDENTIALS.LIST_WITHOUT_GROUP(list),
+      {
+        parse_mode: 'HTML',
+        ...Markup.inlineKeyboard([[Markup.button.callback(KEYBOARDS.BACK, CallbackAction.VBG_BACK)]]),
+      },
+    );
+    botCtx.wizard.selectStep(3);
+  }
+
+  @Action(/^vbg_(?!cancel$|no_group$)/)
   async onGroupSelected(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await botCtx.answerCbQuery();
@@ -73,14 +120,22 @@ export class ViewByGroupScene {
       return;
     }
 
-    const list = credentials.map((c, i) => {
-      const title = c.title ? `${c.title} — ` : '';
-      return `${i + 1}. ${title}${c.login} : ${c.password}`;
-    }).join('\n');
+    const list = credentials
+      .sort((a, b) => {
+        const labelA = a.title ?? a.login;
+        const labelB = b.title ?? b.login;
+        return labelA > labelB ? 1 : labelA < labelB ? -1 : 0;
+      })
+      .map((c, i) =>
+        `${i + 1}. ${formatCredentialLine(c.title, c.login, c.password)}`,
+      ).join('\n');
 
     await ctx.reply(
       CREDENTIALS.LIST_BY_GROUP(list),
-      Markup.inlineKeyboard([[Markup.button.callback(KEYBOARDS.BACK, CallbackAction.VBG_BACK)]]),
+      {
+        parse_mode: 'HTML',
+        ...Markup.inlineKeyboard([[Markup.button.callback(KEYBOARDS.BACK, CallbackAction.VBG_BACK)]]),
+      },
     );
     botCtx.wizard.next();
   }

@@ -1,5 +1,6 @@
 import { Ctx, Wizard, WizardStep, Command, Action } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
+import { Logger } from '@nestjs/common';
 import { UsersService } from '../../../users/users.service';
 import { GroupsService } from '../../../groups/groups.service';
 import { CredentialsService } from '../../../credentials/credentials.service';
@@ -15,6 +16,8 @@ import { KEYBOARDS } from '../../messages/keyboards.messages';
 
 @Wizard(SceneName.DELETE_CREDENTIAL)
 export class DeleteCredentialScene {
+  private readonly logger = new Logger(DeleteCredentialScene.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly groupsService: GroupsService,
@@ -25,11 +28,15 @@ export class DeleteCredentialScene {
   @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
     await ctx.reply(COMMON.CANCELLED, credentialsMenuKeyboard());
     await botCtx.scene.leave();
+  }
+
+  @Command(BotCommand.MENU)
+  async onMenuAttempt(@Ctx() ctx: Context) {
+    await ctx.reply(COMMON.USE_CANCEL_FIRST);
   }
 
   @WizardStep(1)
@@ -41,9 +48,11 @@ export class DeleteCredentialScene {
     const user = await this.usersService.findByTelegramId(telegramId);
     const groups = await this.groupsService.findAllByUser(user!.id);
 
-    const buttons = groups.map((g) =>
-      [Markup.button.callback(g.name, `${ActionPrefix.DEL_CRED_SRC}${g.id}`)]
-    );
+    const buttons = groups
+      .sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0))
+      .map((g) =>
+        [Markup.button.callback(g.name, `${ActionPrefix.DEL_CRED_SRC}${g.id}`)]
+      );
     buttons.push([Markup.button.callback(KEYBOARDS.WITHOUT_GROUP, CallbackAction.DEL_CRED_SRC_NONE)]);
     buttons.push([Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.DEL_CRED_CANCEL)]);
 
@@ -97,10 +106,16 @@ export class DeleteCredentialScene {
       return;
     }
 
-    const buttons = credentials.map((c) => {
-      const label = c.title ? `${c.title} (${c.login})` : c.login;
-      return [Markup.button.callback(label, `${ActionPrefix.DEL_CRED}${c.id}`)];
-    });
+    const buttons = credentials
+      .sort((a, b) => {
+        const labelA = a.title ?? a.login;
+        const labelB = b.title ?? b.login;
+        return labelA > labelB ? 1 : labelA < labelB ? -1 : 0;
+      })
+      .map((c) => {
+        const label = c.title ? `${c.title} (${c.login})` : c.login;
+        return [Markup.button.callback(label, `${ActionPrefix.DEL_CRED}${c.id}`)];
+      });
     buttons.push([Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.DEL_CRED_CANCEL)]);
 
     const sent = await ctx.reply(CREDENTIALS.SELECT_TO_DELETE, Markup.inlineKeyboard(buttons));
@@ -111,7 +126,6 @@ export class DeleteCredentialScene {
   @WizardStep(2)
   async stepWaitForSource(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     const sent = await ctx.reply(COMMON.SELECT_FROM_BUTTONS);
     botCtx.session.messageIds.push(sent.message_id);
   }
@@ -139,7 +153,6 @@ export class DeleteCredentialScene {
   @WizardStep(3)
   async stepWaitForCredential(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     const sent = await ctx.reply(COMMON.SELECT_CREDENTIAL_FROM_BUTTONS);
     botCtx.session.messageIds.push(sent.message_id);
   }
@@ -154,6 +167,9 @@ export class DeleteCredentialScene {
     const user = await this.usersService.findByTelegramId(telegramId);
     const credentialId = botCtx.wizard.state.credentialId!;
     await this.credentialsService.delete(credentialId, user!.id);
+    this.logger.log(
+      `Credential deleted: credentialId=${credentialId}, userId=${user!.id}`,
+    );
 
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
@@ -165,8 +181,15 @@ export class DeleteCredentialScene {
   @WizardStep(4)
   async stepWaitForConfirm(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
-    const sent = await ctx.reply(COMMON.USE_BUTTONS_ABOVE);
+    await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
+    botCtx.session.messageIds = [];
+    const sent = await ctx.reply(
+      CREDENTIALS.DELETE_CONFIRM,
+      Markup.inlineKeyboard([
+        Markup.button.callback(KEYBOARDS.YES_DELETE, CallbackAction.DEL_CRED_CONFIRM),
+        Markup.button.callback(KEYBOARDS.NO, CallbackAction.DEL_CRED_CANCEL),
+      ]),
+    );
     botCtx.session.messageIds.push(sent.message_id);
   }
 }

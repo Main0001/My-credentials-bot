@@ -1,6 +1,7 @@
 import { Ctx, Wizard, WizardStep, Message, Command, Action } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { ConfigService } from '@nestjs/config';
+import { Logger } from '@nestjs/common';
 import { UsersService } from '../../../users/users.service';
 import { GroupsService } from '../../../groups/groups.service';
 import { MessageCleaner } from '../../helpers/message-cleaner';
@@ -15,6 +16,7 @@ import { KEYBOARDS } from '../../messages/keyboards.messages';
 
 @Wizard(SceneName.EDIT_GROUP)
 export class EditGroupScene {
+  private readonly logger = new Logger(EditGroupScene.name);
   private readonly maxLengthGroup: number;
 
   constructor(
@@ -29,11 +31,15 @@ export class EditGroupScene {
   @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
     await ctx.reply(COMMON.CANCELLED, groupsMenuKeyboard());
     await botCtx.scene.leave();
+  }
+
+  @Command(BotCommand.MENU)
+  async onMenuAttempt(@Ctx() ctx: Context) {
+    await ctx.reply(COMMON.USE_CANCEL_FIRST);
   }
 
   @WizardStep(1)
@@ -51,9 +57,11 @@ export class EditGroupScene {
       return;
     }
 
-    const buttons = groups.map((g) =>
-      [Markup.button.callback(g.name, `${ActionPrefix.EDIT_GROUP}${g.id}`)]
-    );
+    const buttons = groups
+      .sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0))
+      .map((g) =>
+        [Markup.button.callback(g.name, `${ActionPrefix.EDIT_GROUP}${g.id}`)]
+      );
     buttons.push([Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.EDIT_GROUP_CANCEL)]);
 
     const sent = await ctx.reply(GROUPS.SELECT_TO_EDIT, Markup.inlineKeyboard(buttons));
@@ -90,7 +98,6 @@ export class EditGroupScene {
   @WizardStep(2)
   async stepWaitForSelection(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     const sent = await ctx.reply(COMMON.SELECT_GROUP_FROM_BUTTONS);
     botCtx.session.messageIds.push(sent.message_id);
   }
@@ -98,7 +105,6 @@ export class EditGroupScene {
   @WizardStep(3)
   async stepSaveName(@Ctx() ctx: Context, @Message('text') text: string) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
       const sent = await ctx.reply(COMMON.ENTER_TEXT_NAME);
@@ -118,6 +124,9 @@ export class EditGroupScene {
     const user = await this.usersService.findByTelegramId(telegramId);
     const groupId = botCtx.wizard.state.groupId!;
     await this.groupsService.update(groupId, user!.id, text);
+    this.logger.log(
+      `Group renamed: groupId=${groupId}, userId=${user!.id}, newName="${text}"`,
+    );
 
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];

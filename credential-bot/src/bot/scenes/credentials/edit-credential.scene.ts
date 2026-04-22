@@ -1,5 +1,6 @@
 import { Ctx, Wizard, WizardStep, Message, Command, Action } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
+import { Logger } from '@nestjs/common';
 import { UsersService } from '../../../users/users.service';
 import { GroupsService } from '../../../groups/groups.service';
 import { CredentialsService } from '../../../credentials/credentials.service';
@@ -9,7 +10,7 @@ import type { BotContext } from '../../interfaces/bot-context.interface';
 import { SceneName } from '../../constants/scenes.enum';
 import { BotCommand } from '../../constants/commands.enum';
 import { CallbackAction, ActionPrefix } from '../../constants/actions.enum';
-import { CREDENTIALS } from '../../messages/credentials.messages';
+import { CREDENTIALS, formatCredentialLine } from '../../messages/credentials.messages';
 import { COMMON } from '../../messages/common.messages';
 import { KEYBOARDS } from '../../messages/keyboards.messages';
 
@@ -24,6 +25,7 @@ const FIELD_KEYBOARD = Markup.inlineKeyboard([
 
 @Wizard(SceneName.EDIT_CREDENTIAL)
 export class EditCredentialScene {
+  private readonly logger = new Logger(EditCredentialScene.name);
   private editField: string = '';
 
   constructor(
@@ -36,11 +38,15 @@ export class EditCredentialScene {
   @Command(BotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
     await ctx.reply(COMMON.CANCELLED, credentialsMenuKeyboard());
     await botCtx.scene.leave();
+  }
+
+  @Command(BotCommand.MENU)
+  async onMenuAttempt(@Ctx() ctx: Context) {
+    await ctx.reply(COMMON.USE_CANCEL_FIRST);
   }
 
   @WizardStep(1)
@@ -52,9 +58,11 @@ export class EditCredentialScene {
     const user = await this.usersService.findByTelegramId(telegramId);
     const groups = await this.groupsService.findAllByUser(user!.id);
 
-    const buttons = groups.map((g) =>
-      [Markup.button.callback(g.name, `${ActionPrefix.EDIT_CRED_SRC}${g.id}`)]
-    );
+    const buttons = groups
+      .sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0))
+      .map((g) =>
+        [Markup.button.callback(g.name, `${ActionPrefix.EDIT_CRED_SRC}${g.id}`)]
+      );
     buttons.push([Markup.button.callback(KEYBOARDS.WITHOUT_GROUP, CallbackAction.EDIT_CRED_SRC_NONE)]);
     buttons.push([Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.EDIT_CRED_CANCEL)]);
 
@@ -108,10 +116,16 @@ export class EditCredentialScene {
       return;
     }
 
-    const buttons = credentials.map((c) => {
-      const label = c.title ? `${c.title} (${c.login})` : c.login;
-      return [Markup.button.callback(label, `${ActionPrefix.EDIT_CRED}${c.id}`)];
-    });
+    const buttons = credentials
+      .sort((a, b) => {
+        const labelA = a.title ?? a.login;
+        const labelB = b.title ?? b.login;
+        return labelA > labelB ? 1 : labelA < labelB ? -1 : 0;
+      })
+      .map((c) => {
+        const label = c.title ? `${c.title} (${c.login})` : c.login;
+        return [Markup.button.callback(label, `${ActionPrefix.EDIT_CRED}${c.id}`)];
+      });
     buttons.push([Markup.button.callback(KEYBOARDS.CANCEL, CallbackAction.EDIT_CRED_CANCEL)]);
 
     const sent = await ctx.reply(CREDENTIALS.SELECT_TO_EDIT, Markup.inlineKeyboard(buttons));
@@ -122,7 +136,6 @@ export class EditCredentialScene {
   @WizardStep(2)
   async stepWaitForSource(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     const sent = await ctx.reply(COMMON.SELECT_FROM_BUTTONS);
     botCtx.session.messageIds.push(sent.message_id);
   }
@@ -134,9 +147,18 @@ export class EditCredentialScene {
     await botCtx.deleteMessage();
 
     const callbackData = (ctx as any).callbackQuery.data as string;
-    botCtx.wizard.state.credentialId = callbackData.replace(ActionPrefix.EDIT_CRED, '');
+    const credentialId = callbackData.replace(ActionPrefix.EDIT_CRED, '');
+    botCtx.wizard.state.credentialId = credentialId;
 
-    const sent = await ctx.reply(CREDENTIALS.WHAT_TO_EDIT, FIELD_KEYBOARD);
+    const telegramId = ctx.from!.id.toString();
+    const user = await this.usersService.findByTelegramId(telegramId);
+    const credential = await this.credentialsService.findOne(credentialId, user!.id);
+
+    const line = formatCredentialLine(credential!.title, credential!.login, credential!.password);
+    const sent = await ctx.reply(CREDENTIALS.CURRENT_CREDENTIAL(line), {
+      parse_mode: 'HTML',
+      ...FIELD_KEYBOARD,
+    });
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.selectStep(4);
   }
@@ -144,7 +166,6 @@ export class EditCredentialScene {
   @WizardStep(3)
   async stepWaitForCredential(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     const sent = await ctx.reply(COMMON.SELECT_CREDENTIAL_FROM_BUTTONS);
     botCtx.session.messageIds.push(sent.message_id);
   }
@@ -166,7 +187,6 @@ export class EditCredentialScene {
   @WizardStep(4)
   async stepWaitForField(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     const sent = await ctx.reply(COMMON.SELECT_FIELD_FROM_BUTTONS);
     botCtx.session.messageIds.push(sent.message_id);
   }
@@ -174,7 +194,6 @@ export class EditCredentialScene {
   @WizardStep(5)
   async stepWaitForField2(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
     const sent = await ctx.reply(COMMON.SELECT_FIELD_FROM_BUTTONS);
     botCtx.session.messageIds.push(sent.message_id);
   }
@@ -182,7 +201,6 @@ export class EditCredentialScene {
   @WizardStep(6)
   async stepSaveField(@Ctx() ctx: Context, @Message('text') text: string) {
     const botCtx = ctx as unknown as BotContext;
-    botCtx.session.messageIds.push(ctx.message!.message_id);
 
     if (!text) {
       const sent = await ctx.reply(CREDENTIALS.ENTER_TEXT_FIELD(this.editField));
@@ -197,11 +215,19 @@ export class EditCredentialScene {
     await this.credentialsService.update(credentialId, user!.id, {
       [this.editField]: text,
     });
+    this.logger.log(
+      `Credential field updated: credentialId=${credentialId}, userId=${user!.id}, field=${this.editField}`,
+    );
 
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
     botCtx.session.messageIds = [];
 
-    const sent = await ctx.reply(CREDENTIALS.FIELD_UPDATED(this.editField), FIELD_KEYBOARD);
+    const updated = await this.credentialsService.findOne(credentialId, user!.id);
+    const line = formatCredentialLine(updated!.title, updated!.login, updated!.password);
+    const sent = await ctx.reply(CREDENTIALS.FIELD_UPDATED(this.editField, line), {
+      parse_mode: 'HTML',
+      ...FIELD_KEYBOARD,
+    });
     botCtx.session.messageIds.push(sent.message_id);
     botCtx.wizard.selectStep(4);
   }
