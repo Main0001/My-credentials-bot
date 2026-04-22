@@ -139,7 +139,9 @@ export class EnterPasswordScene {
         botCtx.session.messageIds,
       );
       botCtx.session.messageIds = [];
-      await ctx.reply(AUTH.ACCESS_GRANTED, mainKeyboard());
+      await this.messageCleaner.deleteMenuMessage(botCtx);
+      const sent = await ctx.reply(AUTH.ACCESS_GRANTED, mainKeyboard());
+      botCtx.session.menuMessageId = sent.message_id;
       await botCtx.scene.leave();
       return;
     }

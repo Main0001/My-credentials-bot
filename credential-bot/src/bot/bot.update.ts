@@ -44,10 +44,12 @@ export class BotUpdate implements OnModuleInit {
   @Start()
   async onStart(@Ctx() ctx: BotContext) {
     this.logger.log(`Bot started: telegramId=${ctx.from?.id}`);
-    await ctx.reply(
+    await this.messageCleaner.deleteMenuMessage(ctx);
+    const sent = await ctx.reply(
       AUTH.WELCOME(ctx.from?.first_name ?? ''),
       mainKeyboard(),
     );
+    ctx.session.menuMessageId = sent.message_id;
   }
 
   @Command(BotCommand.MENU)
