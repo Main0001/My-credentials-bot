@@ -3,14 +3,14 @@ import { Context } from 'telegraf';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { UsersService } from '../../../users/users.service';
-import { MessageCleaner } from '../../helpers/message-cleaner';
-import { mainKeyboard } from '../../keyboards/main.keyboard';
-import type { BotContext } from '../../interfaces/bot-context.interface';
-import { SceneName } from '../../constants/scenes.enum';
-import { BotCommand } from '../../constants/commands.enum';
-import { AUTH } from '../../messages/auth.messages';
-import { COMMON } from '../../messages/common.messages';
+import { UsersService } from '@/users/users.service';
+import { MessageCleaner } from '@/bot/helpers/message-cleaner';
+import { mainKeyboard } from '@/bot/keyboards/main.keyboard';
+import type { BotContext } from '@/bot/interfaces/bot-context.interface';
+import { SceneName } from '@/bot/constants/scenes.enum';
+import { BotCommand } from '@/bot/constants/commands.enum';
+import { AUTH } from '@/bot/messages/auth.messages';
+import { COMMON } from '@/bot/messages/common.messages';
 
 @Wizard(SceneName.SETUP_PASSWORD)
 export class SetupPasswordScene {

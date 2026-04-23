@@ -1,5 +1,5 @@
 import type { MiddlewareFn } from 'telegraf';
-import type { BotContext } from '../interfaces/bot-context.interface';
+import type { BotContext } from '@/bot/interfaces/bot-context.interface';
 
 export const trackMessageIdMiddleware: MiddlewareFn<BotContext> = async (
   ctx,

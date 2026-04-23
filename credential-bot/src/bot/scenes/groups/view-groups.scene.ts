@@ -1,15 +1,15 @@
 import { Ctx, Wizard, WizardStep, Action, Command } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
-import { UsersService } from '../../../users/users.service';
-import { GroupsService } from '../../../groups/groups.service';
-import { groupsMenuKeyboard } from '../../keyboards/groups.keyboard';
-import type { BotContext } from '../../interfaces/bot-context.interface';
-import { SceneName } from '../../constants/scenes.enum';
-import { BotCommand } from '../../constants/commands.enum';
-import { CallbackAction } from '../../constants/actions.enum';
-import { GROUPS } from '../../messages/groups.messages';
-import { COMMON } from '../../messages/common.messages';
-import { KEYBOARDS } from '../../messages/keyboards.messages';
+import { UsersService } from '@/users/users.service';
+import { GroupsService } from '@/groups/groups.service';
+import { groupsMenuKeyboard } from '@/bot/keyboards/groups.keyboard';
+import type { BotContext } from '@/bot/interfaces/bot-context.interface';
+import { SceneName } from '@/bot/constants/scenes.enum';
+import { BotCommand } from '@/bot/constants/commands.enum';
+import { CallbackAction } from '@/bot/constants/actions.enum';
+import { GROUPS } from '@/bot/messages/groups.messages';
+import { COMMON } from '@/bot/messages/common.messages';
+import { KEYBOARDS } from '@/bot/messages/keyboards.messages';
 
 @Wizard(SceneName.VIEW_GROUPS)
 export class ViewGroupsScene {
