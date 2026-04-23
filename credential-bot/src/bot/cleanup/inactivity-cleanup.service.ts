@@ -3,12 +3,12 @@ import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectBot } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
-import { UsersService } from '../../users/users.service';
-import { RedisService } from '../../redis/redis.service';
+import { UsersService } from '@/users/users.service';
+import { RedisService } from '@/redis/redis.service';
 import type {
   BotContext,
   BotSession,
-} from '../interfaces/bot-context.interface';
+} from '@/bot/interfaces/bot-context.interface';
 
 @Injectable()
 export class InactivityCleanupService {

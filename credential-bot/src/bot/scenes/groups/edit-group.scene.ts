@@ -2,17 +2,17 @@ import { Ctx, Wizard, WizardStep, Message, Command, Action } from 'nestjs-telegr
 import { Context, Markup } from 'telegraf';
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
-import { UsersService } from '../../../users/users.service';
-import { GroupsService } from '../../../groups/groups.service';
-import { MessageCleaner } from '../../helpers/message-cleaner';
-import { groupsMenuKeyboard } from '../../keyboards/groups.keyboard';
-import type { BotContext } from '../../interfaces/bot-context.interface';
-import { SceneName } from '../../constants/scenes.enum';
-import { BotCommand } from '../../constants/commands.enum';
-import { CallbackAction, ActionPrefix } from '../../constants/actions.enum';
-import { GROUPS } from '../../messages/groups.messages';
-import { COMMON } from '../../messages/common.messages';
-import { KEYBOARDS } from '../../messages/keyboards.messages';
+import { UsersService } from '@/users/users.service';
+import { GroupsService } from '@/groups/groups.service';
+import { MessageCleaner } from '@/bot/helpers/message-cleaner';
+import { groupsMenuKeyboard } from '@/bot/keyboards/groups.keyboard';
+import type { BotContext } from '@/bot/interfaces/bot-context.interface';
+import { SceneName } from '@/bot/constants/scenes.enum';
+import { BotCommand } from '@/bot/constants/commands.enum';
+import { CallbackAction, ActionPrefix } from '@/bot/constants/actions.enum';
+import { GROUPS } from '@/bot/messages/groups.messages';
+import { COMMON } from '@/bot/messages/common.messages';
+import { KEYBOARDS } from '@/bot/messages/keyboards.messages';
 
 @Wizard(SceneName.EDIT_GROUP)
 export class EditGroupScene {

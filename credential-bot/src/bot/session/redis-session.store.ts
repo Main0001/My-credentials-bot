@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { AsyncSessionStore } from 'telegraf/session';
-import { RedisService } from '../../redis/redis.service';
-import type { BotSession } from '../interfaces/bot-context.interface';
+import { RedisService } from '@/redis/redis.service';
+import type { BotSession } from '@/bot/interfaces/bot-context.interface';
 
 @Injectable()
 export class RedisSessionStore implements AsyncSessionStore<BotSession> {
