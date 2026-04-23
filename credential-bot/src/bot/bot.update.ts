@@ -72,6 +72,7 @@ export class BotUpdate implements OnModuleInit {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
+    ctx.session.menuMessageId = undefined;
     if (!ctx.session.messageIds) ctx.session.messageIds = [];
     const sent = await ctx.reply(GROUPS.MENU, groupsMenuKeyboard());
     ctx.session.messageIds.push(sent.message_id);
@@ -82,6 +83,7 @@ export class BotUpdate implements OnModuleInit {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
+    ctx.session.menuMessageId = undefined;
     if (!ctx.session.messageIds) ctx.session.messageIds = [];
     const sent = await ctx.reply(CREDENTIALS.MENU, credentialsMenuKeyboard());
     ctx.session.messageIds.push(sent.message_id);
@@ -92,6 +94,7 @@ export class BotUpdate implements OnModuleInit {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
+    ctx.session.menuMessageId = undefined;
     if (!ctx.session.messageIds) ctx.session.messageIds = [];
     await this.enterScene(ctx, SceneName.RESET_PASSWORD);
   }
@@ -101,6 +104,7 @@ export class BotUpdate implements OnModuleInit {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
+    ctx.session.menuMessageId = undefined;
     if (!ctx.session.messageIds) ctx.session.messageIds = [];
     await this.enterScene(ctx, SceneName.LOGOUT);
   }
@@ -110,7 +114,8 @@ export class BotUpdate implements OnModuleInit {
     if (!(await this.authGuard.validate(ctx))) return;
     await ctx.answerCbQuery();
     await ctx.deleteMessage();
-    await ctx.reply(KEYBOARDS.CHOOSE_OPTION, mainKeyboard());
+    const sent = await ctx.reply(KEYBOARDS.CHOOSE_OPTION, mainKeyboard());
+    ctx.session.menuMessageId = sent.message_id;
   }
 
   @Action(CallbackAction.GROUP_CREATE)
