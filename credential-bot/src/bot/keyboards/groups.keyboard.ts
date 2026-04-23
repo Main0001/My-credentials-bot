@@ -1,6 +1,6 @@
 import { Markup } from 'telegraf';
-import { CallbackAction } from '../constants/actions.enum';
-import { KEYBOARDS } from '../messages/keyboards.messages';
+import { CallbackAction } from '@/bot/constants/actions.enum';
+import { KEYBOARDS } from '@/bot/messages/keyboards.messages';
 
 export const groupsMenuKeyboard = () =>
   Markup.inlineKeyboard([

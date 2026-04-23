@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import type { BotContext } from '../interfaces/bot-context.interface';
+import type { BotContext } from '@/bot/interfaces/bot-context.interface';
 import dayjs from 'dayjs';
-import { UsersService } from '../../users/users.service';
-import { MessageCleaner } from '../helpers/message-cleaner';
-import { SceneName } from '../constants/scenes.enum';
+import { UsersService } from '@/users/users.service';
+import { MessageCleaner } from '@/bot/helpers/message-cleaner';
+import { SceneName } from '@/bot/constants/scenes.enum';
 
 @Injectable()
 export class AuthGuard {

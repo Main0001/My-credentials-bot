@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Context } from 'telegraf';
-import type { BotContext } from '../interfaces/bot-context.interface';
+import type { BotContext } from '@/bot/interfaces/bot-context.interface';
 
 @Injectable()
 export class MessageCleaner {

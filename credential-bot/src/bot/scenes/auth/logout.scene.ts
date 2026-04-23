@@ -1,16 +1,16 @@
 import { Ctx, Wizard, WizardStep, Action, Command } from 'nestjs-telegraf';
 import { Context, Markup } from 'telegraf';
 import { Logger } from '@nestjs/common';
-import { UsersService } from '../../../users/users.service';
-import { MessageCleaner } from '../../helpers/message-cleaner';
-import type { BotContext } from '../../interfaces/bot-context.interface';
-import { SceneName } from '../../constants/scenes.enum';
-import { BotCommand } from '../../constants/commands.enum';
-import { CallbackAction } from '../../constants/actions.enum';
-import { AUTH } from '../../messages/auth.messages';
-import { COMMON } from '../../messages/common.messages';
-import { KEYBOARDS } from '../../messages/keyboards.messages';
-import { mainKeyboard } from '../../keyboards/main.keyboard';
+import { UsersService } from '@/users/users.service';
+import { MessageCleaner } from '@/bot/helpers/message-cleaner';
+import type { BotContext } from '@/bot/interfaces/bot-context.interface';
+import { SceneName } from '@/bot/constants/scenes.enum';
+import { BotCommand } from '@/bot/constants/commands.enum';
+import { CallbackAction } from '@/bot/constants/actions.enum';
+import { AUTH } from '@/bot/messages/auth.messages';
+import { COMMON } from '@/bot/messages/common.messages';
+import { KEYBOARDS } from '@/bot/messages/keyboards.messages';
+import { mainKeyboard } from '@/bot/keyboards/main.keyboard';
 
 @Wizard(SceneName.LOGOUT)
 export class LogoutScene {

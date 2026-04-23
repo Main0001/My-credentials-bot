@@ -4,7 +4,7 @@ import {
   CreateCredentialData,
   UpdateCredentialData,
 } from './interfaces/credentials.interfaces';
-import { CryptoHelper } from '../bot/helpers/crypto.helper';
+import { CryptoHelper } from '@/bot/helpers/crypto.helper';
 
 @Injectable()
 export class CredentialsService {
