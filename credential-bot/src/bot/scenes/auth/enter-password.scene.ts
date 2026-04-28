@@ -34,7 +34,8 @@ export class EnterPasswordScene {
 
   @Command(BotCommand.MENU)
   async onMenuAttempt(@Ctx() ctx: Context) {
-    await ctx.reply(
+    const botCtx = ctx as unknown as BotContext;
+    const sent = await ctx.reply(
       AUTH.ENTER_PASSWORD,
       Markup.inlineKeyboard([
         [
@@ -45,11 +46,13 @@ export class EnterPasswordScene {
         ],
       ]),
     );
+    botCtx.session.messageIds.push(sent.message_id);
   }
 
   @Command(BotCommand.CANCEL)
   async onCancelAttempt(@Ctx() ctx: Context) {
-    await ctx.reply(
+    const botCtx = ctx as unknown as BotContext;
+    const sent = await ctx.reply(
       AUTH.ENTER_PASSWORD,
       Markup.inlineKeyboard([
         [
@@ -60,6 +63,7 @@ export class EnterPasswordScene {
         ],
       ]),
     );
+    botCtx.session.messageIds.push(sent.message_id);
   }
 
   @WizardStep(1)
