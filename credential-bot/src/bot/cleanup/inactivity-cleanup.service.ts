@@ -27,7 +27,7 @@ export class InactivityCleanupService {
     )!;
   }
 
-  @Cron(CronExpression.EVERY_5_MINUTES) //.EVERY_30_MINUTES)
+  @Cron(CronExpression.EVERY_3_HOURS) //.EVERY_30_MINUTES)
   async cleanup() {
     const users = await this.usersService.findInactive(
       this.inactivityTimeoutHours,
