@@ -63,7 +63,9 @@ export class UsersRepository {
 
   findInactive(threshold: Date) {
     return this.prisma.user.findMany({
-      where: { lastActivityAt: { lt: threshold } },
+      where: {
+        OR: [{ lastActivityAt: { lt: threshold } }, { lastActivityAt: null }],
+      },
     });
   }
 }
