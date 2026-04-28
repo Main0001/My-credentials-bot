@@ -42,7 +42,7 @@ export class UsersService {
   }
 
   findInactive(hours: number) {
-    const threshold = new Date(Date.now() - 1); //- hours * 60 * 60 * 1000);
+    const threshold = new Date(Date.now() - hours * 60 * 60 * 1000);
     return this.usersRepository.findInactive(threshold);
   }
 }
