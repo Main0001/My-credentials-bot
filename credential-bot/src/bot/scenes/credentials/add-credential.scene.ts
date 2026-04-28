@@ -8,7 +8,7 @@ import { MessageCleaner } from '@/bot/helpers/message-cleaner';
 import { credentialsMenuKeyboard } from '@/bot/keyboards/credentials.keyboard';
 import type { BotContext } from '@/bot/interfaces/bot-context.interface';
 import { SceneName } from '@/bot/constants/scenes.enum';
-import { BotCommand } from '@/bot/constants/commands.enum';
+import { EBotCommand } from '@/bot/constants/commands.enum';
 import { CallbackAction, ActionPrefix } from '@/bot/constants/actions.enum';
 import { CREDENTIALS } from '@/bot/messages/credentials.messages';
 import { COMMON } from '@/bot/messages/common.messages';
@@ -25,7 +25,7 @@ export class AddCredentialScene {
     private readonly messageCleaner: MessageCleaner,
   ) {}
 
-  @Command(BotCommand.CANCEL)
+  @Command(EBotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
@@ -34,7 +34,7 @@ export class AddCredentialScene {
     await botCtx.scene.leave();
   }
 
-  @Command(BotCommand.MENU)
+  @Command(EBotCommand.MENU)
   async onMenuAttempt(@Ctx() ctx: Context) {
     await ctx.reply(COMMON.USE_CANCEL_FIRST);
   }
@@ -50,7 +50,7 @@ export class AddCredentialScene {
     botCtx.wizard.next();
   }
 
-  @Command(BotCommand.SKIP)
+  @Command(EBotCommand.SKIP)
   async onSkipTitle(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     botCtx.wizard.state.title = undefined;

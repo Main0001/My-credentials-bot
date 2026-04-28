@@ -5,7 +5,7 @@ import { GroupsService } from '@/groups/groups.service';
 import { groupsMenuKeyboard } from '@/bot/keyboards/groups.keyboard';
 import type { BotContext } from '@/bot/interfaces/bot-context.interface';
 import { SceneName } from '@/bot/constants/scenes.enum';
-import { BotCommand } from '@/bot/constants/commands.enum';
+import { EBotCommand } from '@/bot/constants/commands.enum';
 import { CallbackAction } from '@/bot/constants/actions.enum';
 import { GROUPS } from '@/bot/messages/groups.messages';
 import { COMMON } from '@/bot/messages/common.messages';
@@ -18,7 +18,7 @@ export class ViewGroupsScene {
     private readonly groupsService: GroupsService,
   ) {}
 
-  @Command(BotCommand.MENU)
+  @Command(EBotCommand.MENU)
   async onMenuAttempt(@Ctx() ctx: Context) {
     await ctx.reply(COMMON.USE_CANCEL_FIRST);
   }

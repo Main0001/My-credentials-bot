@@ -8,7 +8,7 @@ import { mainKeyboard } from './keyboards/main.keyboard';
 import { groupsMenuKeyboard } from './keyboards/groups.keyboard';
 import { credentialsMenuKeyboard } from './keyboards/credentials.keyboard';
 import { SceneName } from './constants/scenes.enum';
-import { BotCommand } from './constants/commands.enum';
+import { EBotCommand } from './constants/commands.enum';
 import { CallbackAction } from './constants/actions.enum';
 import { BOT_COMMANDS } from './constants/bot-commands.config';
 import { BOT_DESCRIPTION, BOT_SHORT_DESCRIPTION } from './constants/bot-description.config';
@@ -52,7 +52,7 @@ export class BotUpdate implements OnModuleInit {
     ctx.session.menuMessageId = sent.message_id;
   }
 
-  @Command(BotCommand.MENU)
+  @Command(EBotCommand.MENU)
   async onMenu(@Ctx() ctx: BotContext) {
     if (ctx.scene.current) {
       await ctx.reply(COMMON.USE_CANCEL_FIRST);

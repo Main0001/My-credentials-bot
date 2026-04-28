@@ -6,7 +6,7 @@ import { CredentialsService } from '@/credentials/credentials.service';
 import { credentialsMenuKeyboard } from '@/bot/keyboards/credentials.keyboard';
 import type { BotContext } from '@/bot/interfaces/bot-context.interface';
 import { SceneName } from '@/bot/constants/scenes.enum';
-import { BotCommand } from '@/bot/constants/commands.enum';
+import { EBotCommand } from '@/bot/constants/commands.enum';
 import { CallbackAction, ActionPrefix } from '@/bot/constants/actions.enum';
 import { CREDENTIALS, formatCredentialLine } from '@/bot/messages/credentials.messages';
 import { GROUPS } from '@/bot/messages/groups.messages';
@@ -21,7 +21,7 @@ export class ViewByGroupScene {
     private readonly credentialsService: CredentialsService,
   ) {}
 
-  @Command(BotCommand.MENU)
+  @Command(EBotCommand.MENU)
   async onMenuAttempt(@Ctx() ctx: Context) {
     await ctx.reply(COMMON.USE_CANCEL_FIRST);
   }

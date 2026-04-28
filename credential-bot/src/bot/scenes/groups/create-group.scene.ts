@@ -8,7 +8,7 @@ import { MessageCleaner } from '@/bot/helpers/message-cleaner';
 import { groupsMenuKeyboard } from '@/bot/keyboards/groups.keyboard';
 import type { BotContext } from '@/bot/interfaces/bot-context.interface';
 import { SceneName } from '@/bot/constants/scenes.enum';
-import { BotCommand } from '@/bot/constants/commands.enum';
+import { EBotCommand } from '@/bot/constants/commands.enum';
 import { GROUPS } from '@/bot/messages/groups.messages';
 import { COMMON } from '@/bot/messages/common.messages';
 
@@ -26,7 +26,7 @@ export class CreateGroupScene {
     this.maxLengthGroup = configService.get<number>('groups.maxLengthGroup')!;
   }
 
-  @Command(BotCommand.CANCEL)
+  @Command(EBotCommand.CANCEL)
   async onCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
@@ -35,7 +35,7 @@ export class CreateGroupScene {
     await botCtx.scene.leave();
   }
 
-  @Command(BotCommand.MENU)
+  @Command(EBotCommand.MENU)
   async onMenuAttempt(@Ctx() ctx: Context) {
     await ctx.reply(COMMON.USE_CANCEL_FIRST);
   }

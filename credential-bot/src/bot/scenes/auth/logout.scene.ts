@@ -5,7 +5,7 @@ import { UsersService } from '@/users/users.service';
 import { MessageCleaner } from '@/bot/helpers/message-cleaner';
 import type { BotContext } from '@/bot/interfaces/bot-context.interface';
 import { SceneName } from '@/bot/constants/scenes.enum';
-import { BotCommand } from '@/bot/constants/commands.enum';
+import { EBotCommand } from '@/bot/constants/commands.enum';
 import { CallbackAction } from '@/bot/constants/actions.enum';
 import { AUTH } from '@/bot/messages/auth.messages';
 import { COMMON } from '@/bot/messages/common.messages';
@@ -21,7 +21,7 @@ export class LogoutScene {
     private readonly messageCleaner: MessageCleaner,
   ) {}
 
-  @Command(BotCommand.CANCEL)
+  @Command(EBotCommand.CANCEL)
   async onСommandCancel(@Ctx() ctx: Context) {
     const botCtx = ctx as unknown as BotContext;
     await this.messageCleaner.deleteMessages(botCtx, botCtx.session.messageIds);
@@ -30,7 +30,7 @@ export class LogoutScene {
     await botCtx.scene.leave();
   }
 
-  @Command(BotCommand.MENU)
+  @Command(EBotCommand.MENU)
   async onMenuAttempt(@Ctx() ctx: Context) {
     await ctx.reply(COMMON.USE_CANCEL_FIRST);
   }

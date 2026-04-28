@@ -1,4 +1,4 @@
-export enum BotCommand {
+export enum EBotCommand {
   CANCEL = 'cancel',
   SKIP = 'skip',
   MENU = 'menu',

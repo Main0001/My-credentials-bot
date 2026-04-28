@@ -9,7 +9,7 @@ import { MessageCleaner } from '@/bot/helpers/message-cleaner';
 import { mainKeyboard } from '@/bot/keyboards/main.keyboard';
 import type { BotContext } from '@/bot/interfaces/bot-context.interface';
 import { SceneName } from '@/bot/constants/scenes.enum';
-import { BotCommand } from '@/bot/constants/commands.enum';
+import { EBotCommand } from '@/bot/constants/commands.enum';
 import { CallbackAction } from '@/bot/constants/actions.enum';
 import { AUTH } from '@/bot/messages/auth.messages';
 import { COMMON } from '@/bot/messages/common.messages';
@@ -32,7 +32,7 @@ export class EnterPasswordScene {
     )!;
   }
 
-  @Command(BotCommand.MENU)
+  @Command(EBotCommand.MENU)
   async onMenuAttempt(@Ctx() ctx: Context) {
     await ctx.reply(
       AUTH.ENTER_PASSWORD,
@@ -47,7 +47,7 @@ export class EnterPasswordScene {
     );
   }
 
-  @Command(BotCommand.CANCEL)
+  @Command(EBotCommand.CANCEL)
   async onCancelAttempt(@Ctx() ctx: Context) {
     await ctx.reply(
       AUTH.ENTER_PASSWORD,
