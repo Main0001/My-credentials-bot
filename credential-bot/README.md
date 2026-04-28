@@ -1,5 +1,5 @@
 # Credential Bot
-
+ 
 Telegram-bot for securely storing and managing credentials (logins/passwords), organized by groups.
 
 ## Tech Stack
