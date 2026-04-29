@@ -11,6 +11,9 @@ datasource db {
 model User {
   id                   String   @id @default(uuid())
   telegramId           String   @unique
+  email                String   @unique
+  pendingEmail         String?
+  pendingEmailAt       DateTime?
   passwordHash         String
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
