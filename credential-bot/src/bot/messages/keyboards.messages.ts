@@ -2,6 +2,7 @@ export const KEYBOARDS = {
   // Main keyboard (reply)
   GROUPS: 'Groups 📁',
   CREDENTIALS: 'Credentials 🔑',
+  CHANGE_EMAIL: 'Change email 📧',
   RESET_PASSWORD: 'Reset password 🔄',
   LOGOUT: 'Logout 🚪',
 
@@ -27,6 +28,8 @@ export const KEYBOARDS = {
   YES_DELETE_EVERYTHING: 'Yes, delete everything 🗑️',
   YES_LOGOUT: 'Yes, logout 🚪',
   NO: 'No ↩️',
+  RESEND_CODE: 'Resend code 📧',
+  CANCEL_PENDING: 'Cancel pending change ↩️',
 
   // Edit credential fields
   TITLE: 'Title 📝',

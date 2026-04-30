@@ -2,6 +2,7 @@ export enum SceneName {
   SETUP_PASSWORD = 'setup-password',
   ENTER_PASSWORD = 'enter-password',
   RESET_PASSWORD = 'reset-password',
+  CHANGE_EMAIL = 'change-email',
   LOGOUT = 'logout',
 
   CREATE_GROUP = 'create-group',

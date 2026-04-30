@@ -3,6 +3,7 @@ export enum CallbackAction {
   BACK_TO_MAIN = 'back_to_main',
   MAIN_GROUPS = 'main_groups',
   MAIN_CREDENTIALS = 'main_credentials',
+  MAIN_CHANGE_EMAIL = 'main_change_email',
   MAIN_RESET_PASSWORD = 'main_reset_password',
   MAIN_LOGOUT = 'main_logout',
 
@@ -26,6 +27,14 @@ export enum CallbackAction {
   RESET_CANCEL = 'reset_cancel',
   LOGOUT_CONFIRM = 'logout_confirm',
   LOGOUT_CANCEL = 'logout_cancel',
+
+  // Email verification (resend code in different flows)
+  RESEND_SETUP_CODE = 'resend_setup_code',
+  RESEND_RESET_CODE = 'resend_reset_code',
+  RESEND_EMAIL_CHANGE_CODE = 'resend_email_change_code',
+
+  // Change email scene
+  EMAIL_CHANGE_CANCEL = 'email_change_cancel',
 
   // Delete group scene
   DEL_GROUP_CONFIRM = 'del_group_confirm',

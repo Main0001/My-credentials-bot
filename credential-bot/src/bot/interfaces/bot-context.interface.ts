@@ -9,6 +9,7 @@ export interface BotSession extends Scenes.WizardSession {
 export interface WizardState {
   password?: string;
   attempts?: number;
+  email?: string;
   groupId?: string;
   groupName?: string;
   credentialId?: string;
