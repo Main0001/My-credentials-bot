@@ -9,12 +9,36 @@ export class UsersService {
     return this.usersRepository.findByTelegramId(telegramId);
   }
 
-  create(telegramId: string, passwordHash: string) {
-    return this.usersRepository.create(telegramId, passwordHash);
+  findByEmail(email: string) {
+    return this.usersRepository.findByEmail(email);
+  }
+
+  create(telegramId: string, email: string, passwordHash: string) {
+    return this.usersRepository.create(telegramId, email, passwordHash);
   }
 
   updatePassword(userId: string, passwordHash: string) {
     return this.usersRepository.updatePassword(userId, passwordHash);
+  }
+
+  updateEmail(userId: string, email: string) {
+    return this.usersRepository.updateEmail(userId, email);
+  }
+
+  setPendingEmail(
+    userId: string,
+    pendingEmail: string,
+    pendingEmailAt: Date,
+  ) {
+    return this.usersRepository.setPendingEmail(
+      userId,
+      pendingEmail,
+      pendingEmailAt,
+    );
+  }
+
+  clearPendingEmail(userId: string) {
+    return this.usersRepository.clearPendingEmail(userId);
   }
 
   updateLastActivity(userId: string) {
@@ -44,5 +68,9 @@ export class UsersService {
   findInactive(hours: number) {
     const threshold = new Date(Date.now() - hours * 60 * 60 * 1000);
     return this.usersRepository.findInactive(threshold);
+  }
+
+  findUsersWithPendingEmailDue(now: Date) {
+    return this.usersRepository.findUsersWithPendingEmailDue(now);
   }
 }

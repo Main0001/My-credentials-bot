@@ -9,9 +9,13 @@ export class UsersRepository {
     return this.prisma.user.findUnique({ where: { telegramId } });
   }
 
-  create(telegramId: string, passwordHash: string) {
+  findByEmail(email: string) {
+    return this.prisma.user.findUnique({ where: { email } });
+  }
+
+  create(telegramId: string, email: string, passwordHash: string) {
     return this.prisma.user.create({
-      data: { telegramId, passwordHash },
+      data: { telegramId, email, passwordHash },
     });
   }
 
@@ -19,6 +23,31 @@ export class UsersRepository {
     return this.prisma.user.update({
       where: { id: userId },
       data: { passwordHash },
+    });
+  }
+
+  updateEmail(userId: string, email: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { email, pendingEmail: null, pendingEmailAt: null },
+    });
+  }
+
+  setPendingEmail(
+    userId: string,
+    pendingEmail: string,
+    pendingEmailAt: Date,
+  ) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { pendingEmail, pendingEmailAt },
+    });
+  }
+
+  clearPendingEmail(userId: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { pendingEmail: null, pendingEmailAt: null },
     });
   }
 
@@ -65,6 +94,15 @@ export class UsersRepository {
     return this.prisma.user.findMany({
       where: {
         OR: [{ lastActivityAt: { lt: threshold } }, { lastActivityAt: null }],
+      },
+    });
+  }
+
+  findUsersWithPendingEmailDue(now: Date) {
+    return this.prisma.user.findMany({
+      where: {
+        pendingEmail: { not: null },
+        pendingEmailAt: { lte: now },
       },
     });
   }

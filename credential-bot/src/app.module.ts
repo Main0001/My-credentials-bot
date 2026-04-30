@@ -4,6 +4,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { configuration } from './config/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
+import { MailModule } from './mail/mail.module';
+import { AuthCodeModule } from './auth-code/auth-code.module';
 import { BotModule } from './bot/bot.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -17,6 +19,8 @@ import { AppService } from './app.service';
     ScheduleModule.forRoot(),
     PrismaModule,
     RedisModule,
+    MailModule,
+    AuthCodeModule,
     BotModule,
   ],
   controllers: [AppController],
